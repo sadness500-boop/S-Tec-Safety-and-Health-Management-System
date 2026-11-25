@@ -1,6 +1,6 @@
 {
   "name": "s-tec-safety-and-health-management-system",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "S-Tec Safety & Health Management System(에스텍 안전보건 관리 시스템) — 안드로이드 앱 포장(Capacitor). Designed & Developed by Rat Rae Choi",
   "scripts": {

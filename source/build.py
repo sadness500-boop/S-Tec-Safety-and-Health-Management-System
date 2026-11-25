@@ -11,7 +11,7 @@ def uri(p, mime): return f'data:{mime};base64,' + base64.b64encode(open(p, 'rb')
 asset = json.loads(rd(V + 'assets-base.json'))
 asset['icon'] = uri(V + 'icon.png', 'image/png')            # 메인화면 좌측 상단 아이콘 · 앱 아이콘
 asset['hero'] = uri(V + 'hero.jpg', 'image/jpeg')           # 출력물(PPT · Word) 표지용 정지 그림
-asset['heroSvg'] = uri(V + 'hero.svg', 'image/svg+xml')     # 메인화면 히어로 — 사업장 안전 디오라마(움직이는 SVG)
+asset['heroAnim'] = uri(V + 'hero-anim.gif', 'image/gif')  # 메인화면 히어로 — 안전보건 관리시스템 디오라마 애니메이션(업로드 GIF 원본 그대로)
 asset['thumbs'] = {f[:-4]: uri(ROOT + 'media/thumb/' + f, 'image/jpeg') for f in sorted(os.listdir(ROOT + 'media/thumb')) if f.endswith('.jpg')}
 html = rd(S + 'index.html')
 APPJS = '\n'.join(rd(S + f) for f in ['app.js', 'ui.js', 'views.js', 'views2.js', 'views3.js', 'demo.js', 'media.js', 'out_base.js', 'out.js', 'guide.js'])

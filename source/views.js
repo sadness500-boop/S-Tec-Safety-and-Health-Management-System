@@ -260,7 +260,7 @@ const VS = { sig: '', sigPx: 1860 };
 function isAdminUser() { const p = window.STSH_AUTH && STSH_AUTH.profile; return !!(p && ['owner', 'admin'].includes(p.role)); }
 function openGuide() { return openManual('user'); }
 async function init() {
-  $('#appIcon').src = ASSET.icon; $('#gateLogo').src = ASSET.icon; $('#heroImg').src = ASSET.heroSvg || ASSET.hero; $('#mainIc').src = ASSET.icon;
+  $('#appIcon').src = ASSET.icon; $('#gateLogo').src = ASSET.icon; $('#heroImg').src = ASSET.heroAnim || ASSET.hero; $('#mainIc').src = ASSET.icon;
   $('#ver').textContent = APP.version;
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef; $('#btnGuide').onclick = e => { e.preventDefault(); openGuide(); };
   $$('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
