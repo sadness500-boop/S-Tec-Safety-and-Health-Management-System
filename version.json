@@ -1,7 +1,7 @@
 {
-  "version": "1.0.2",
+  "version": "1.1.0",
   "date": "2026-11-26",
-  "note": "회사 · 조직 선택을 통합관리 시스템 「회사·조직」 표(에스텍 그룹 161개 조직 트리)와 같게 — 에스텍 그룹 → 회사 → 부문·본부 → 지사·팀, 로그인 시 서버 최신 표 자동 반영",
-  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.2.html",
-  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.2.apk"
+  "note": "📒 안전보건 관리대장 탭 신설(7장 46항목 · 사업장별 적용 자동 판정 · 서류 자동 작성 · 원본 첨부 · 조직 일괄 작성) · 양식·서류 불러오기(Word·PPT·PDF·사진 → 사업장별 작성) · 회사·조직 선택을 접이식 트리로",
+  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.1.0.html",
+  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.1.0.apk"
 }

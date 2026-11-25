@@ -17,6 +17,49 @@ function ouOptions(sel, all = '에스텍 그룹 전체') {
   ouRoots().forEach(r => walk(r, 0));
   return out.join('');
 }
+/* 접이식 조직 트리 — 「data-outree」가 붙은 조직 선택칸을 트리 드롭다운으로 바꿈
+ *  상위 조직 이름을 누르면 하위 조직이 펼쳐지고, 다시 누르면 접힘 · 「선택」 단추로 그 조직을 고름 · 이름 찾기 */
+function ouCounts() { const cnt = {}; SITE_LIST.forEach(s => ouChain(siteOu(s)).forEach(o => cnt[o.id] = (cnt[o.id] || 0) + 1)); return cnt; }
+function ouTreeMount(sel) {
+  if (sel.dataset.otm) return; sel.dataset.otm = '1'; sel.style.display = 'none';
+  const allTxt = sel.options[0] ? sel.options[0].text : '에스텍 그룹 전체';
+  const box = document.createElement('div'); box.className = 'otree'; sel.after(box);
+  const open = new Set(); ouChain(sel.value).forEach(o => open.add(o.id)); ouRoots().forEach(r => open.add(r.id));
+  let q = '', cnt = null;
+  const nameOf = id => { const o = OU_ID[id]; return o ? (ouLabel(o.id) || o.name) : allTxt; };
+  box.innerHTML = `<button type="button" class="ot-btn" aria-haspopup="tree"><span class="ot-cur"></span><i>▾</i></button><div class="ot-pop" hidden><div class="ot-top"><input class="ot-q" placeholder="조직 이름 찾기 (예: 동부, 미화)"><button type="button" class="ot-x" data-all>모두 접기</button></div><div class="ot-list" role="tree"></div></div>`;
+  const btn = box.querySelector('.ot-btn'), pop = box.querySelector('.ot-pop'), list = box.querySelector('.ot-list');
+  const setCur = () => { box.querySelector('.ot-cur').textContent = nameOf(sel.value) + (cnt && cnt[sel.value] ? ` (${cnt[sel.value]}곳)` : ''); };
+  const hit = o => !q || o.name.includes(q) || (o.kind || '').includes(q);
+  const subHit = o => hit(o) || (OU_KIDS[o.id] || []).some(subHit);
+  const draw = () => {
+    cnt = cnt || ouCounts(); const out = [`<div class="ot-row ${sel.value === '' ? 'on' : ''}" style="--d:0"><span class="ot-tg"></span><button type="button" class="ot-nm" data-pick="">🏢 ${esc(allTxt)}</button></div>`];
+    const walk = (o, d) => {
+      if (q && !subHit(o)) return;
+      const kids = OU_KIDS[o.id] || [], isOpen = q ? true : open.has(o.id);
+      if (d > 0) out.push(`<div class="ot-row ${o.id === sel.value ? 'on' : ''} ${kids.length ? 'par' : ''}" style="--d:${d - 1}" role="treeitem" aria-expanded="${kids.length ? isOpen : ''}">
+        <button type="button" class="ot-tg" ${kids.length ? `data-tg="${o.id}" aria-label="${isOpen ? '접기' : '펼치기'}"` : 'tabindex="-1"'}>${kids.length ? (isOpen ? '▾' : '▸') : '·'}</button>
+        <button type="button" class="ot-nm" ${kids.length ? `data-tg="${o.id}"` : `data-pick="${o.id}"`}>${esc(o.name)}${o.kind ? ` <small>${esc(o.kind)}</small>` : ''}${cnt[o.id] ? ` <em>${cnt[o.id]}곳</em>` : ''}${kids.length ? ` <small class="ot-n">하위 ${kids.length}</small>` : ''}</button>
+        ${kids.length ? `<button type="button" class="ot-sel" data-pick="${o.id}">선택</button>` : ''}</div>`);
+      if (d === 0 || isOpen) kids.forEach(k => walk(k, d + 1));
+    };
+    ouRoots().forEach(r => walk(r, 0));
+    list.innerHTML = out.join('') || '<div class="empty">찾는 조직이 없습니다</div>';
+  };
+  const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', outside, true); };
+  const outside = e => { if (!box.contains(e.target)) close(); };
+  btn.onclick = () => { if (!pop.hidden) return close(); draw(); pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.addEventListener('pointerdown', outside, true); const on = list.querySelector('.ot-row.on'); if (on) on.scrollIntoView({ block: 'nearest' }); };
+  list.onclick = e => {
+    const t = e.target.closest('[data-tg],[data-pick]'); if (!t) return;
+    if (t.dataset.tg != null && t.dataset.pick == null) { const id = t.dataset.tg; open.has(id) ? open.delete(id) : open.add(id); draw(); return; }
+    sel.value = t.dataset.pick; close(); setCur(); sel.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  box.querySelector('.ot-q').oninput = e => { q = e.target.value.trim(); draw(); };
+  box.querySelector('[data-all]').onclick = () => { open.clear(); ouRoots().forEach(r => open.add(r.id)); q = ''; box.querySelector('.ot-q').value = ''; draw(); };
+  box.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); btn.focus(); } });
+  cnt = ouCounts(); setCur();
+}
+new MutationObserver(() => document.querySelectorAll('select[data-outree]:not([data-otm])').forEach(ouTreeMount)).observe(document.documentElement, { childList: true, subtree: true });
 function sitesFiltered(F) { const q = (F.q || '').trim(); return SITE_LIST.filter(s => siteOk(s, { ou: F.ou }) && (!q || s.name.includes(q) || (s.addr || '').includes(q))); }
 function siteBadge(s) { return s.org === 'best' ? `<span class="brb b-${s.br}">${s.br}</span>` : s.user ? '<span class="brb b-u">추가</span>' : `<span class="brb b-${s.org}">${esc(orgName(s.org).replace('에스텍', '').replace('사업본부', ''))}</span>`; }
 function curSite() { return SITE[UI.site] || null; }
@@ -24,7 +67,7 @@ function siteBarHtml() {
   const F = UI.F || {}, s = curSite(), act = activeSiteKeys();
   const list = sitesFiltered(Object.assign({}, F, { q: V.siteQ })).sort((a, b) => (act.has(b.key) - act.has(a.key)) || a.name.localeCompare(b.name, 'ko'));
   return `<div class="sitebar">
-    <label class="wide">회사 · 조직 (에스텍 그룹 ${OU.length}개 조직)<select data-sb="ou">${ouOptions(F.ou || '')}</select></label>
+    <label class="wide">회사 · 조직 (에스텍 그룹 ${OU.length}개 조직)<select data-sb="ou" data-outree>${ouOptions(F.ou || '')}</select></label>
     <label>사업장 찾기<input data-sb="q" value="${esc(V.siteQ)}" placeholder="이름·주소 일부"></label>
     <label class="wide">사업장 (● 기록 중)<select data-sb="site"><option value="">사업장을 고르세요 (${list.length}곳)</option>${list.map(x => `<option value="${x.key}" ${x.key === UI.site ? 'selected' : ''}>${act.has(x.key) ? '● ' : ''}${esc(x.name)} · ${esc(siteOrgLabel(x))} · ${x.jobs.map(j => JOBS[j] ? JOBS[j].s : j).join('/')}</option>`).join('')}</select></label>
     ${s ? `<div class="now"><b>${esc(s.name)} ${siteBadge(s)}</b><small>${esc(siteOrgLabel(s))} · ${s.jobs.map(j => JOBS[j] ? JOBS[j].ic + JOBS[j].s : j).join(' ')} · ${s.total ? s.total + '명' : '인원 미등록'}${s.shift ? ' · ' + esc(s.shift) : ''}${s.client && s.client.name ? ' · 고객사 담당 ' + esc(s.client.name) : ''}</small></div>` : ''}
@@ -98,7 +141,7 @@ RENDER.dash = function renderDash() {
   <div class="filters">
     <label class="per">기간<div class="chips">${per.map(([k, n]) => `<button class="chip" data-per="${k}" aria-pressed="${(UI.per || 'm') === k}">${n}</button>`).join('')}</div></label>
     <label class="per">기준<div class="nav"><button class="btn sm" data-nav="-1">◀</button><b style="padding:6px 4px;font-size:13px">${esc(r.label)}</b><button class="btn sm" data-nav="1">▶</button><button class="btn sm" data-nav="0">오늘</button></div></label>
-    <label style="flex:3 1 280px">회사 · 조직<select data-f="ou">${ouOptions(F.ou || '')}</select></label>
+    <label style="flex:3 1 280px">회사 · 조직<select data-f="ou" data-outree>${ouOptions(F.ou || '')}</select></label>
     <label>업종<select data-f="job">${jobOptions(F.job || '')}</select></label>
   </div>
   ${G.n ? '' : `<div class="sbn">아직 기록을 시작한 사업장이 없습니다. 사업장을 골라 TBM · 위험성평가 · 점검을 기록하면 여기에 이행률이 나타납니다. 화면을 먼저 보려면 <button class="btn sm" id="dDemo">🧪 예시 자료 넣기</button> (가상 사업장 2곳 · 언제든 지움)</div>`}
@@ -193,7 +236,7 @@ RENDER.set = function renderSet() {
   host.innerHTML = siteBarHtml() + `<div class="two">
   <div>${s ? `<div class="card" style="--c:#0B1F8A"><h2>🏢 사업장 안전보건 설정 — ${esc(s.name)}</h2><div class="body">
     <div class="field"><label>업종(여러 개 선택)</label><div class="chips">${Object.entries(JOBS).map(([k, j]) => `<button type="button" class="chip g" data-sj="${k}" aria-pressed="${s.jobs.includes(k)}">${j.ic} ${j.n}</button>`).join('')}</div></div>
-    <div class="field"><label>소속 회사 · 조직 (통합관리 시스템 「회사·조직」 표)</label><select id="sOu">${ouOptions(siteOu(s), '조직을 고르세요')}</select></div>
+    <div class="field"><label>소속 회사 · 조직 (통합관리 시스템 「회사·조직」 표)</label><select id="sOu" data-outree>${ouOptions(siteOu(s), '조직을 고르세요')}</select></div>
     <div class="grid2"><div class="field"><label>근무형태(TBM 기준일)</label><select id="sShift">${['', '격일제', '3조2교대', '4조3교대', '24시간 교대', '주5일', '주간 통상'].map(x => `<option ${x === (c.shift || s.shift) ? 'selected' : ''} value="${x}">${x || '사업장 목록 기준'}</option>`).join('')}</select></div>
     <div class="field"><label>관리 시작일(이행률 계산 시작)</label><input type="date" id="sStart" value="${esc(c.start || '')}"></div></div>
     <div class="grid2"><div class="field"><label>정기교육 반기 기준 시간</label><input type="number" id="sRegH" min="0" step="1" value="${esc(c.regH || EDU.reg.h)}"></div>
@@ -206,7 +249,7 @@ RENDER.set = function renderSet() {
   </div></div>` : needSite('사업장을 고르면 업종 · 근무형태 · 고객사 담당자를 설정합니다.')}
   <div class="card" style="--c:#1B7A34"><h2>➕ 목록에 없는 사업장 추가</h2><div class="body">
     <div class="grid2"><div class="field"><label>사업장명</label><input id="aName"></div><div class="field"><label>업종</label><select id="aJob">${jobOptions('sec', '')}</select></div></div>
-    <div class="field"><label>소속 회사 · 조직</label><select id="aOu">${ouOptions(UI.F.ou || '', '조직을 고르세요')}</select></div>
+    <div class="field"><label>소속 회사 · 조직</label><select id="aOu" data-outree>${ouOptions(UI.F.ou || '', '조직을 고르세요')}</select></div>
     <div class="mrow"><button class="btn" id="aAdd">추가</button></div>
   </div></div></div>
   <div>

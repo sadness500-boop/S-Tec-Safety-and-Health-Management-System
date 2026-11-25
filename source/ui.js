@@ -83,7 +83,7 @@ function mgrFormHtml() {
     <div><label class="btn sm" for="mgFile">사진 선택</label><input type="file" id="mgFile" accept="image/*" hidden> <button class="btn sm" id="mgNoPh" type="button">사진 빼기</button></div></div>
     <div class="grid2"><div class="field"><label for="mgName">성명 (필수)</label><input id="mgName" value="${esc(m.name)}" autocomplete="name"></div>
     <div class="field"><label for="mgTitle">직책</label><input id="mgTitle" value="${esc(m.title)}" placeholder="예: 반장, 소장, 안전관리자, 지사장"></div></div>
-    <div class="grid2"><div class="field"><label for="mgBr">담당 회사 · 조직 (사업장 목록을 이 조직으로 시작)</label><select id="mgBr">${ouOptions(m.ou || (m.br && OU_MAP.best[m.br]) || '', '에스텍 그룹 전체')}</select></div>
+    <div class="grid2"><div class="field"><label for="mgBr">담당 회사 · 조직 (사업장 목록을 이 조직으로 시작)</label><select id="mgBr" data-outree>${ouOptions(m.ou || (m.br && OU_MAP.best[m.br]) || '', '에스텍 그룹 전체')}</select></div>
     <div class="field"><label for="mgOrg">소속</label><input id="mgOrg" value="${esc(m.org)}"></div></div>
     <div class="grid2"><div class="field"><label for="mgPhone">연락처</label><input id="mgPhone" value="${esc(m.phone)}" inputmode="tel"></div>
     <div class="field"><label for="mgMail">이메일</label><input id="mgMail" value="${esc(m.email || '')}" inputmode="email"></div></div>

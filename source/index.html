@@ -408,6 +408,39 @@ table.spit td{vertical-align:middle} table.t.spit,.cv table.t{min-width:0}
 html[data-theme="dark"] .legal{background:#2A1614;color:#F3B8AE}
 .lock2{font-size:11.5px;color:var(--mute);background:var(--soft);border-radius:8px;padding:6px 9px}
 .cards2{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+/* 접이식 조직 트리 */
+.otree{position:relative;width:100%}
+.ot-btn{width:100%;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);text-align:left;cursor:pointer}
+.ot-btn .ot-cur{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ot-btn i{font-style:normal;color:var(--mute)}
+.ot-pop{position:absolute;z-index:80;left:0;right:0;top:calc(100% + 4px);min-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(10,20,60,.28);padding:8px}
+.ot-top{display:flex;gap:6px;margin-bottom:6px}.ot-top .ot-q{flex:1}.ot-x{border:1px solid var(--line);background:var(--soft);border-radius:9px;font-size:12px;font-weight:700;padding:0 10px;color:var(--ink2);white-space:nowrap}
+.ot-list{max-height:min(60vh,460px);overflow:auto;font-weight:500}
+.ot-row{display:flex;align-items:center;gap:2px;padding-left:calc(var(--d) * 18px);border-radius:8px}
+.ot-row:hover{background:var(--soft)}.ot-row.on{background:#DCE7FF}html[data-theme="dark"] .ot-row.on{background:#22336B}
+.ot-tg{width:26px;height:30px;flex:none;border:0;background:none;color:var(--nv);font-size:13px;cursor:pointer}
+.ot-nm{flex:1;text-align:left;border:0;background:none;padding:6px 4px;font-size:13.5px;color:var(--ink);cursor:pointer}
+.ot-row.par>.ot-nm{font-weight:800}.ot-nm small{color:var(--mute);font-weight:600;font-size:11px}.ot-nm em{font-style:normal;color:#1B7A34;font-weight:800;font-size:11.5px;margin-left:2px}.ot-nm .ot-n{color:#7A86A8}
+.ot-sel{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--nv);border-radius:8px;font-size:11.5px;font-weight:800;padding:3px 9px;margin-right:4px;cursor:pointer}.ot-sel:hover{background:var(--nv);color:#fff}
+.field .otree,.sitebar .otree{margin-top:0}
+/* 📒 안전보건 관리대장 */
+.lprof{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.lprof div{background:var(--soft);border-radius:12px;padding:8px 10px}.lprof small{display:block;color:var(--mute);font-size:11px;font-weight:700}.lprof b{font-size:13.5px}
+.lsum{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.lsum b{font-size:20px;color:var(--nv)}.lsum span{color:var(--mute);font-size:12.5px}
+.lbar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;min-width:60px;flex:1}.lbar i{display:block;height:100%;background:linear-gradient(90deg,#1B7A34,#2F9E4F);border-radius:6px}.lbar.big{height:14px;flex:1 1 200px}.lbar.sm{max-width:120px;height:6px}
+td .lbar{display:inline-block;width:70px;vertical-align:middle;margin-right:6px}
+.lchs{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.lch{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.lch>summary{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;list-style:none;background:linear-gradient(90deg,rgba(11,31,138,.07),transparent)}.lch>summary::-webkit-details-marker{display:none}
+.lch>summary::before{content:"▸";color:var(--nv);font-weight:900}.lch[open]>summary::before{content:"▾"}.lch>summary b{font-size:15px;color:var(--nv)}.lcnt{margin-left:auto;font-size:12px;font-weight:800;color:var(--mute)}
+.lrow{display:grid;grid-template-columns:42px minmax(0,1fr) 54px 74px auto;gap:8px;align-items:center;padding:9px 14px;border-top:1px solid var(--line)}
+.lrow.ok{background:rgba(27,122,52,.05)}.lrow.na{opacity:.55}
+.lno{font-weight:900;color:var(--nv);font-size:13px}.lt b{font-size:13.5px}.lt small{display:block;color:var(--mute);font-size:11.5px}.lt small.lwhy{color:#7A86A8;font-style:italic}
+.lv{border:2px solid var(--c);color:var(--c);background:none;border-radius:10px;font-weight:900;font-size:14px;padding:2px 0;cursor:pointer;line-height:1.1}.lv small{display:block;font-size:9.5px;font-weight:700;color:var(--mute)}
+.lst{font-size:12px;font-weight:800;color:#1B7A34;text-align:center}.lst small{display:block;font-weight:600;color:var(--mute)}.lst em{color:#B45309;font-style:normal}
+.lact{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.lfiles{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.lfile{display:inline-flex;align-items:center;gap:2px;background:var(--soft);border-radius:8px;padding:2px 6px;font-size:11.5px}.lfile button{border:0;background:none;color:#B3261E;cursor:pointer;font-size:11px}
+@media(max-width:760px){.lrow{grid-template-columns:38px minmax(0,1fr) 50px}.lrow .lst{grid-column:2}.lrow .lact{grid-column:1/-1;justify-content:flex-start}}
+.ldrop{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px dashed var(--line);border-radius:16px;padding:18px;cursor:pointer;margin:6px 0 10px;background:var(--soft)}.ldrop.on{border-color:var(--gr);background:var(--grl)}.ldrop b{color:var(--nv)}.ldrop span{color:var(--mute);font-size:12px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;margin:4px 0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -477,6 +510,7 @@ html[data-theme="dark"] .legal{background:#2A1614;color:#F3B8AE}
     <button role="tab" data-tab="rep" aria-selected="false">⚠ 아차사고·의견</button>
     <button role="tab" data-tab="edu" aria-selected="false">🎓 교육·보호구</button>
     <button role="tab" data-tab="co" aria-selected="false">🤝 도급인 협의</button>
+    <button role="tab" data-tab="led" aria-selected="false">📒 관리대장</button>
     <button role="tab" data-tab="report" aria-selected="false">🖨 보고서 출력</button>
     <button role="tab" data-tab="set" aria-selected="false">⚙ 사업장·설정</button>
   </nav>
@@ -488,6 +522,7 @@ html[data-theme="dark"] .legal{background:#2A1614;color:#F3B8AE}
   <section class="pane" id="p-rep"></section>
   <section class="pane" id="p-edu"></section>
   <section class="pane" id="p-co"></section>
+  <section class="pane" id="p-led"></section>
   <section class="pane" id="p-report"></section>
   <section class="pane" id="p-set"></section>
 
@@ -510,6 +545,7 @@ html[data-theme="dark"] .legal{background:#2A1614;color:#F3B8AE}
 <div id="render"></div>
 
 <!--LIBS-->
+<!--PDFJS-->
 <!--QR-->
 <script>/*ASSETS*/</script>
 <script>/*HF*/</script>
