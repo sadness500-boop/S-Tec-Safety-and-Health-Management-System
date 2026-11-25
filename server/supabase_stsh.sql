@@ -4,7 +4,7 @@
 --
 --  ● 어디에 실행하나요?  통합 로그인 Supabase 프로젝트(mnsuebexlzhvomxhrear) → SQL Editor → 이 파일 전체 붙여넣기 → Run
 --  ● 무엇을 하나요?
---    1) 통합관리 시스템 「프로그램 등록부」(program_registry)에 안전보건 관리(stsh)를 12번째(sort 115)로 등록
+--    1) 통합관리 시스템 「프로그램 등록부」(program_registry)에 안전보건 관리(stsh)를 근태관리(ams, sort 20) 다음 카드(sort 25)로 등록
 --    2) 프로그램별 권한(app_access)에서 stsh 지정 가능하게 함
 --    3) 공유 안전보건 기록 sh_records + sh_put · sh_list · sh_delete
 --       - 현장(사용자)은 자기 기록을 올리고 고침 · 제작자·관리자는 전체 · 담당 지사를 받은 사용자는 그 지사 기록
@@ -21,10 +21,10 @@ begin
     insert into public.program_registry (code, name, full_name, url, icon, color, sort, uses_access, version, note)
     values ('stsh', '안전보건 관리 시스템', 'S-Tec Safety & Health Management System',
             'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
-            'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/icons/icon-192.png', '#C2410C', 115, true, '1.0.0',
+            'assets/apps/stsh.png', '#C2410C', 25, true, '1.0.0',
             '중대재해처벌법 대응 · 위험성평가 · TBM · 안전점검 · 아차사고 · 교육·보호구 · 도급인 협의')
     on conflict (code) do update set name = excluded.name, url = excluded.url, icon = excluded.icon, full_name = excluded.full_name,
-      color = excluded.color, sort = excluded.sort, note = excluded.note;
+      color = excluded.color, sort = excluded.sort, note = excluded.note, uses_access = excluded.uses_access, version = excluded.version;
   end if;
   if to_regclass('public.app_access') is not null then
     for c in select conname from pg_constraint
