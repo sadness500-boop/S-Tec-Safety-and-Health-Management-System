@@ -1,0 +1,12 @@
+{
+  "appId": "kr.stecbest.safety",
+  "appName": "안전보건 관리",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "hostname": "sadness500-boop.github.io"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

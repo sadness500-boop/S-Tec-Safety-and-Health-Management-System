@@ -1,0 +1,8 @@
+node_modules/
+www/
+android/
+ios/
+assets/icon-only.png
+assets/icon-foreground.png
+assets/icon-background.svg
+stsh-latest.apk

@@ -1,0 +1,20 @@
+{
+  "name": "s-tec-safety-and-health-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "S-Tec Safety & Health Management System(에스텍 안전보건 관리 시스템) — 안드로이드 앱 포장(Capacitor). Designed & Developed by Rat Rae Choi",
+  "scripts": {
+    "www": "rm -rf www && mkdir -p www && cp index.html manifest.webmanifest auth-config.json version.json www/ && cp -r icons media www/"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.0",
+    "@capacitor/browser": "6.0.5",
+    "@capacitor/core": "6.2.0",
+    "@capacitor/filesystem": "6.0.3",
+    "@capacitor/share": "6.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "6.2.0"
+  }
+}
