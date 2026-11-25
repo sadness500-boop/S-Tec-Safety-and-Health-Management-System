@@ -11,7 +11,7 @@ const APP = {
   ko: '에스텍 안전보건 관리 시스템',
   sub: '중대재해처벌법 대응',
   code: 'stsh',
-  version: 'v1.0.1',
+  version: 'v1.0.2',
   build: '2026-11-25',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk',
@@ -135,10 +135,37 @@ function buildSites() {
   a.forEach(s => { const c = SH.cfg[s.key]; if (c) { if (c.jobs && c.jobs.length) s.jobs = c.jobs; if (c.ind) s.ind = c.ind; if (c.shift) s.shift = c.shift; if (c.client) s.client = c.client; if (c.total) s.total = +c.total; } });
   SITE_LIST = a; SITE = {}; a.forEach(s => SITE[s.key] = s);
 }
-function siteOrgLabel(s) { return !s ? '' : s.org === 'best' ? `에스텍베스트 ${s.br}지사` : s.user ? (s.orgN || '직접 추가') : orgName(s.org); }
+/* ---------- 에스텍 그룹 회사 · 조직 트리(통합관리 시스템 「회사·조직」과 같은 표) ---------- */
+const OU_KEY = 'stec_ou_list';
+let OU = [], OU_ID = {}, OU_KIDS = {};
+function ouBuild(list) {
+  OU = (list || []).map(o => Array.isArray(o) ? { id: o[0], name: o[1], kind: o[2], parent: o[3] || '' } : { id: o.id, name: o.name, kind: o.kind || '', parent: o.parent || '' }).filter(o => o.id && o.name);
+  OU_ID = {}; OU_KIDS = {}; OU.forEach(o => { OU_ID[o.id] = o; (OU_KIDS[o.parent] = OU_KIDS[o.parent] || []).push(o); });
+  const rank = { '그룹': 0, '회사': 1, '부문': 2, '사업부': 3, '본부': 4, '실': 5, '센터': 6, '지사': 7, '팀': 8, '파트': 9, '연구소': 9 };
+  Object.values(OU_KIDS).forEach(a => a.sort((x, y) => x.parent === 'G000' && y.parent === 'G000' ? 0 : (rank[x.kind] ?? 6) - (rank[y.kind] ?? 6) || x.name.localeCompare(y.name, 'ko')));
+}
+(function () { let c = null; try { c = JSON.parse(localStorage.getItem(OU_KEY) || 'null'); } catch (e) { } ouBuild(c && c.length ? c : OU_BASE); })();
+/* 서버의 최신 회사·조직 표(public_org_list) — 로그인 전에도 공개 함수로 읽음 */
+async function ouRefresh() {
+  const sb = (window.STSH_AUTH && STSH_AUTH.client) || null; if (!sb) return false;
+  try { const { data, error } = await sb.rpc('public_org_list'); if (error || !Array.isArray(data) || !data.length) return false;
+    const s = JSON.stringify(data); if (s === localStorage.getItem(OU_KEY)) return false; localStorage.setItem(OU_KEY, s); ouBuild(data); return true; } catch (e) { return false; }
+}
+function ouRoots() { return (OU_KIDS[''] || []).length ? OU_KIDS[''] : OU.filter(o => !OU_ID[o.parent]); }
+function ouChain(id) { const out = []; let o = OU_ID[id], n = 0; while (o && n++ < 20) { out.unshift(o); o = OU_ID[o.parent]; } return out; }
+function ouUnder(id, root) { if (!root) return true; let o = OU_ID[id], n = 0; while (o && n++ < 20) { if (o.id === root) return true; o = OU_ID[o.parent]; } return false; }
+function ouCompany(id) { const c = ouChain(id); return c.find(o => o.kind === '회사') || c[1] || c[0] || null; }
+function ouLabel(id) { const c = ouChain(id).filter(o => o.kind !== '그룹'); return c.length ? c.map(o => o.name).join(' ') : ''; }
+/* 사업장이 속한 조직 */
+function siteOu(s) {
+  if (!s) return ''; const c = SH.cfg[s.key]; if (c && c.ou && OU_ID[c.ou]) return c.ou; if (s.ou && OU_ID[s.ou]) return s.ou;
+  const m = OU_MAP[s.org]; const id = typeof m === 'object' ? (m[s.br || ''] || m['']) : m; return id && OU_ID[id] ? id : (s.org === 'best' ? 'O01' : 'G000');
+}
+function siteOrgLabel(s) { if (!s) return ''; const l = ouLabel(siteOu(s)); return l || (s.org === 'best' ? `에스텍베스트 ${s.br}지사` : s.user ? (s.orgN || '직접 추가') : orgName(s.org)); }
 function siteOk(s, F) {
   if (!s) return false;
   if (F.site && s.key !== F.site) return false;
+  if (F.ou && !ouUnder(siteOu(s), F.ou)) return false;
   if (F.org && (F.org === 'u' ? !s.user : s.org !== F.org)) return false;
   if (F.br && s.br !== F.br) return false;
   if (F.job && !s.jobs.includes(F.job)) return false;

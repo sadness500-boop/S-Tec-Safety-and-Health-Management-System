@@ -1,7 +1,7 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "date": "2026-11-26",
-  "note": "앱 아이콘(메인화면 좌측 상단 · 웹 설치 · 안드로이드 APK)을 업로드한 「안전보건 관리시스템」 아이콘으로, 메인 히어로를 안전보건 디오라마 GIF 애니메이션으로 교체",
-  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.1.html",
-  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.1.apk"
+  "note": "회사 · 조직 선택을 통합관리 시스템 「회사·조직」 표(에스텍 그룹 161개 조직 트리)와 같게 — 에스텍 그룹 → 회사 → 부문·본부 → 지사·팀, 로그인 시 서버 최신 표 자동 반영",
+  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.2.html",
+  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.0.2.apk"
 }

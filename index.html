@@ -8,9 +8,9 @@
 <title>S-Tec Safety &amp; Health Management System · 에스텍 안전보건 관리 시스템</title>
 <meta name="description" content="에스텍 안전보건 관리 시스템(중대재해처벌법 대응) — 위험성평가 · TBM · 업종별 안전점검 · 아차사고 · 종사자 의견 · 교육·보호구 · 도급인 협의를 사업장별로 전자화하고 고객사 제출용 안전보건 이행 현황(Word·PPT·PDF·엑셀)을 만듭니다.">
 <meta name="theme-color" content="#0C2350">
-<link rel="manifest" href="manifest.webmanifest?v=1.0.1">
-<link rel="icon" href="icons/favicon-48.png?v=1.0.1">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=1.0.1">
+<link rel="manifest" href="manifest.webmanifest?v=1.0.2">
+<link rel="icon" href="icons/favicon-48.png?v=1.0.2">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=1.0.2">
 <style>
 /* =====================================================================
    S-Tec Safety & Health Management System — 화면 디자인 (성과관리 시스템과 같은 에스텍 공통 디자인)
@@ -3718,6 +3718,12 @@ const GROUP_SITES = [
   ['first', '안산사랑의병원', 'hosp', '차달봉 소장', 26], ['first', '인천사랑병원', 'hosp', '유도삼 소장', 26], ['busan', '고려아연', 'mfg', '권영호 소장', 37]
 ];
 
+/* ---------- 에스텍 그룹 회사 · 조직(통합관리 시스템 「회사·조직」 표 — 서버 public_org_list) ----------
+ * 로그인하면 서버의 최신 표로 바꿔 씁니다(이 목록은 서버에 닿지 않을 때 쓰는 2026-11-26 사본). [id, 이름, 종류, 상위 id] */
+const OU_BASE = [["G000","에스텍 그룹","그룹",""],["G048","KT&G지사","지사","G047"],["G064","LM팀","팀","G063"],["G059","PM사업부","사업부","G058"],["G060","PM운영사업본부","본부","G059"],["G067","RS사업팀","팀","G066"],["G119","경영지원팀","팀","G118"],["G108","경영지원팀","팀","G107"],["G145","경영지원팀","팀","G144"],["G142","경영지원팀","팀","G141"],["G134","경영지원팀","팀","G133"],["G126","경영지원팀","팀","G125"],["G124","경영지원팀","팀","O01"],["G088","공시·IR파트","파트","G087"],["G030","구미지사","지사","G029"],["G040","도곡지사","지사","G039"],["G020","동경기지사","지사","G019"],["G014","동부의료지사","지사","G013"],["G136","동부지사","지사","G135"],["G072","마케팅팀","팀","G071"],["G051","메디칼지사","지사","G050"],["G111","메트로지사","지사","G110"],["G103","방제연구소","연구소","G102"],["G025","부산지사","지사","G024"],["G096","서울/경기파트","파트","G095"],["G115","서울지사","지사","G114"],["G005","서초지사","지사","G004"],["G071","소방사업본부","본부","G070"],["G053","수도권센터","센터","G052"],["G002","시큐리티사업부문","부문","G001"],["G001","에스텍시스템","회사","G000"],["G147","영업1팀","팀","G146"],["G151","영업팀","팀","G150"],["G080","융합솔루션1본부","본부","G079"],["G084","인사팀","팀","G083"],["G061","자산운영팀","팀","G060"],["G068","중앙센터","센터","G067"],["G010","중앙지사","지사","G009"],["G046","지원팀","팀","G045"],["G154","지원팀","팀","G153"],["G075","지원팀","팀","G074"],["G003","지원팀","팀","G002"],["G035","천안지사","지사","G034"],["G092","회계파트","파트","G091"],["G063","PFM마케팅사업본부","본부","G059"],["G062","PM지원팀","팀","G060"],["G066","RS사업부","사업부","G058"],["G073","SCM센터","센터","G071"],["G135","TS사업본부","본부","G133"],["G006","강동지사","지사","G004"],["G011","강서지사","지사","G009"],["G054","경기남부센터","센터","G052"],["G031","경북지사","지사","G029"],["O02","동부지사","지사","O01"],["G076","마케팅1본부","본부","G074"],["G049","멀티지사","지사","G047"],["G041","메트로지사","지사","G039"],["G109","미화지원팀","팀","G107"],["G089","법무·총무파트","파트","G087"],["G026","사천지사","지사","G024"],["G155","사회공헌사업본부","본부","G153"],["G152","생산팀","팀","G150"],["G015","서부의료지사","지사","G013"],["G137","서부지사","지사","G135"],["G004","서울본부","본부","G002"],["G104","소방연구소","연구소","G102"],["G107","에스텍에이스","회사","G000"],["G069","영남센터","센터","G067"],["G148","영업2팀","팀","G146"],["G021","용인지사","지사","G019"],["G081","융합솔루션2본부","본부","G079"],["G045","인프라사업부문","부문","G001"],["G093","자금파트","파트","G091"],["G047","자산관리1본부","본부","G045"],["G146","자원순환사업본부","본부","G144"],["G116","중부지사","지사","G114"],["G120","중앙지사","지사","G118"],["G143","중앙지사","지사","G141"],["G127","중앙지사","지사","G125"],["G112","중앙지사","지사","G110"],["G097","충청/호남파트","파트","G095"],["G036","충청지사","지사","G034"],["G085","커뮤니케이션팀","팀","G083"],["G065","투자자문팀","팀","G063"],["G140","HR팀","팀","G133"],["G138","HS지사","지사","G135"],["G055","경남센터","센터","G052"],["G009","경인본부","본부","G002"],["G016","남부의료지사","지사","G013"],["G117","대구지사","지사","G114"],["G032","대구지사","지사","G029"],["G121","동부지사","지사","G118"],["G007","롯데지사","지사","G004"],["G077","마케팅2본부","본부","G074"],["G022","서경기지사","지사","G019"],["G128","서부지사","지사","G125"],["O06","서부지사","지사","O01"],["G113","성빈센트지사","지사","G110"],["G042","센트럴지사","지사","G039"],["G105","시스템개발연구소","연구소","G102"],["G118","에스텍퍼스트","회사","G000"],["G098","영남파트","파트","G095"],["G149","운영팀","팀","G146"],["G086","인사지원팀","팀","G083"],["G012","인천지사","지사","G009"],["G050","자산관리2본부","본부","G045"],["G110","자산관리사업1본부","본부","G107"],["G150","재활용사업본부","본부","G144"],["G027","창원지사","지사","G024"],["G037","탕정지사","지사","G034"],["G082","특화영업본부","본부","G079"],["G058","환경사업부문","부문","G001"],["G028","거제지사","지사","G024"],["G043","경기지사","지사","G039"],["G056","경북센터","센터","G052"],["G023","남경기지사","지사","G019"],["O07","남부지사","지사","O01"],["G008","동대문지사","지사","G004"],["G129","동부지사","지사","G125"],["G078","마케팅3본부","본부","G074"],["G013","메디칼본부","본부","G002"],["G052","방제사업본부","본부","G045"],["G087","법무팀","팀","G083"],["G139","북부지사","지사","G135"],["G122","서부지사","지사","G118"],["G070","소방사업부문","부문","G001"],["O01","에스텍베스트","회사","G000"],["G033","울산지사","지사","G029"],["G114","자산관리사업2본부","본부","G107"],["G017","중앙의료지사","지사","G013"],["G038","호남지사","지사","G034"],["G019","경원본부","본부","G002"],["G123","남부지사","지사","G118"],["G074","마케팅부문","부문","G001"],["G130","북부지사","지사","G125"],["G057","서부센터","센터","G052"],["G044","서부지사","지사","G039"],["G018","성빈센트지사","지사","G013"],["G079","시스템사업그룹","그룹","G074"],["G125","에스텍세이프","회사","G000"],["G090","인재채용팀","팀","G083"],["O08","중부지사","지사","O01"],["G083","경영지원실","실","G001"],["G131","남부지사","지사","G125"],["G024","부경본부","본부","G002"],["G133","에스텍플러스","회사","G000"],["G091","재무팀","팀","G083"],["G132","HS지사","지사","G125"],["G094","경영진단팀","팀","G083"],["G029","경울본부","본부","G002"],["G141","에스텍프라임","회사","G000"],["G034","서부본부","본부","G002"],["G095","안전환경팀","팀","G083"],["G144","에스텍에코","회사","G000"],["G039","HS본부","본부","G002"],["G099","경영정보팀","팀","G083"],["G153","어울림에프","회사","G000"],["G100","경영관리팀","팀","G083"],["G101","전략기획팀","팀","G083"],["G102","에스텍R&D연구센터","센터","G083"],["G106","해외사업부","사업부","G083"]];
+/* 사업장 목록의 조직 구분 → 회사·조직 표의 조직(사업장이 속한 곳) */
+const OU_MAP = { best: { '동부': 'O02', '서부': 'O06', '남부': 'O07', '중부': 'O08', '': 'O01' }, ace: 'G107', first: 'G118', safe: 'G125', am: 'G045', busan: 'G024' };
+
 /* ---------- 안전보건 이행지수(SHI) — 고객사 보고용 종합 점수 ---------- */
 const SHI_W = [
   ['tbm', 'TBM 실시율', 25], ['chk', '안전점검 이행률', 20], ['ra', '위험성평가 관리', 20],
@@ -3738,7 +3744,7 @@ const APP = {
   ko: '에스텍 안전보건 관리 시스템',
   sub: '중대재해처벌법 대응',
   code: 'stsh',
-  version: 'v1.0.1',
+  version: 'v1.0.2',
   build: '2026-11-25',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk',
@@ -3862,10 +3868,37 @@ function buildSites() {
   a.forEach(s => { const c = SH.cfg[s.key]; if (c) { if (c.jobs && c.jobs.length) s.jobs = c.jobs; if (c.ind) s.ind = c.ind; if (c.shift) s.shift = c.shift; if (c.client) s.client = c.client; if (c.total) s.total = +c.total; } });
   SITE_LIST = a; SITE = {}; a.forEach(s => SITE[s.key] = s);
 }
-function siteOrgLabel(s) { return !s ? '' : s.org === 'best' ? `에스텍베스트 ${s.br}지사` : s.user ? (s.orgN || '직접 추가') : orgName(s.org); }
+/* ---------- 에스텍 그룹 회사 · 조직 트리(통합관리 시스템 「회사·조직」과 같은 표) ---------- */
+const OU_KEY = 'stec_ou_list';
+let OU = [], OU_ID = {}, OU_KIDS = {};
+function ouBuild(list) {
+  OU = (list || []).map(o => Array.isArray(o) ? { id: o[0], name: o[1], kind: o[2], parent: o[3] || '' } : { id: o.id, name: o.name, kind: o.kind || '', parent: o.parent || '' }).filter(o => o.id && o.name);
+  OU_ID = {}; OU_KIDS = {}; OU.forEach(o => { OU_ID[o.id] = o; (OU_KIDS[o.parent] = OU_KIDS[o.parent] || []).push(o); });
+  const rank = { '그룹': 0, '회사': 1, '부문': 2, '사업부': 3, '본부': 4, '실': 5, '센터': 6, '지사': 7, '팀': 8, '파트': 9, '연구소': 9 };
+  Object.values(OU_KIDS).forEach(a => a.sort((x, y) => x.parent === 'G000' && y.parent === 'G000' ? 0 : (rank[x.kind] ?? 6) - (rank[y.kind] ?? 6) || x.name.localeCompare(y.name, 'ko')));
+}
+(function () { let c = null; try { c = JSON.parse(localStorage.getItem(OU_KEY) || 'null'); } catch (e) { } ouBuild(c && c.length ? c : OU_BASE); })();
+/* 서버의 최신 회사·조직 표(public_org_list) — 로그인 전에도 공개 함수로 읽음 */
+async function ouRefresh() {
+  const sb = (window.STSH_AUTH && STSH_AUTH.client) || null; if (!sb) return false;
+  try { const { data, error } = await sb.rpc('public_org_list'); if (error || !Array.isArray(data) || !data.length) return false;
+    const s = JSON.stringify(data); if (s === localStorage.getItem(OU_KEY)) return false; localStorage.setItem(OU_KEY, s); ouBuild(data); return true; } catch (e) { return false; }
+}
+function ouRoots() { return (OU_KIDS[''] || []).length ? OU_KIDS[''] : OU.filter(o => !OU_ID[o.parent]); }
+function ouChain(id) { const out = []; let o = OU_ID[id], n = 0; while (o && n++ < 20) { out.unshift(o); o = OU_ID[o.parent]; } return out; }
+function ouUnder(id, root) { if (!root) return true; let o = OU_ID[id], n = 0; while (o && n++ < 20) { if (o.id === root) return true; o = OU_ID[o.parent]; } return false; }
+function ouCompany(id) { const c = ouChain(id); return c.find(o => o.kind === '회사') || c[1] || c[0] || null; }
+function ouLabel(id) { const c = ouChain(id).filter(o => o.kind !== '그룹'); return c.length ? c.map(o => o.name).join(' ') : ''; }
+/* 사업장이 속한 조직 */
+function siteOu(s) {
+  if (!s) return ''; const c = SH.cfg[s.key]; if (c && c.ou && OU_ID[c.ou]) return c.ou; if (s.ou && OU_ID[s.ou]) return s.ou;
+  const m = OU_MAP[s.org]; const id = typeof m === 'object' ? (m[s.br || ''] || m['']) : m; return id && OU_ID[id] ? id : (s.org === 'best' ? 'O01' : 'G000');
+}
+function siteOrgLabel(s) { if (!s) return ''; const l = ouLabel(siteOu(s)); return l || (s.org === 'best' ? `에스텍베스트 ${s.br}지사` : s.user ? (s.orgN || '직접 추가') : orgName(s.org)); }
 function siteOk(s, F) {
   if (!s) return false;
   if (F.site && s.key !== F.site) return false;
+  if (F.ou && !ouUnder(siteOu(s), F.ou)) return false;
   if (F.org && (F.org === 'u' ? !s.user : s.org !== F.org)) return false;
   if (F.br && s.br !== F.br) return false;
   if (F.job && !s.jobs.includes(F.job)) return false;
@@ -4211,7 +4244,7 @@ function mgrFormHtml() {
     <div><label class="btn sm" for="mgFile">사진 선택</label><input type="file" id="mgFile" accept="image/*" hidden> <button class="btn sm" id="mgNoPh" type="button">사진 빼기</button></div></div>
     <div class="grid2"><div class="field"><label for="mgName">성명 (필수)</label><input id="mgName" value="${esc(m.name)}" autocomplete="name"></div>
     <div class="field"><label for="mgTitle">직책</label><input id="mgTitle" value="${esc(m.title)}" placeholder="예: 반장, 소장, 안전관리자, 지사장"></div></div>
-    <div class="grid2"><div class="field"><label for="mgBr">담당 지사 (사업장 목록을 이 지사로 시작)</label><select id="mgBr"><option value="">회사 전체</option>${BRANCHES.map(b => `<option value="${b.key}" ${b.key === m.br ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div>
+    <div class="grid2"><div class="field"><label for="mgBr">담당 회사 · 조직 (사업장 목록을 이 조직으로 시작)</label><select id="mgBr">${ouOptions(m.ou || (m.br && OU_MAP.best[m.br]) || '', '에스텍 그룹 전체')}</select></div>
     <div class="field"><label for="mgOrg">소속</label><input id="mgOrg" value="${esc(m.org)}"></div></div>
     <div class="grid2"><div class="field"><label for="mgPhone">연락처</label><input id="mgPhone" value="${esc(m.phone)}" inputmode="tel"></div>
     <div class="field"><label for="mgMail">이메일</label><input id="mgMail" value="${esc(m.email || '')}" inputmode="email"></div></div>
@@ -4224,8 +4257,8 @@ function bindMgrForm(root, done) {
   return () => {
     const name = root.querySelector('#mgName').value.trim();
     if (!name) { root.querySelector('#mgErr').textContent = '안전보건 담당 성명을 입력해야 프로그램이 시작됩니다.'; root.querySelector('#mgName').focus(); return false; }
-    UI.manager = { name, title: root.querySelector('#mgTitle').value.trim(), br: root.querySelector('#mgBr').value, org: root.querySelector('#mgOrg').value.trim(), phone: root.querySelector('#mgPhone').value.trim(), email: root.querySelector('#mgMail').value.trim(), photo, since: (UI.manager && UI.manager.since) || today() };
-    if (UI.manager.br && !UI.F.org) { UI.F.org = 'best'; UI.F.br = UI.manager.br; }
+    UI.manager = { name, title: root.querySelector('#mgTitle').value.trim(), ou: root.querySelector('#mgBr').value, br: '', org: root.querySelector('#mgOrg').value.trim(), phone: root.querySelector('#mgPhone').value.trim(), email: root.querySelector('#mgMail').value.trim(), photo, since: (UI.manager && UI.manager.since) || today() };
+    if (UI.manager.ou) UI.F = Object.assign({}, UI.F, { ou: UI.manager.ou, org: '', br: '' });
     saveUI(); renderHeader(); done && done(); if (window.renderAll) renderAll(); return true;
   };
 }
@@ -4269,15 +4302,22 @@ const V = { raId: '', tbmD: '', tbmJob: '', chkJob: '', chkCyc: 'w', chkD: '', e
 function orgOptions(sel) { return `<option value="">전체 조직</option>` + ORGS.map(o => `<option value="${o.k}" ${o.k === sel ? 'selected' : ''}>${esc(o.n)}</option>`).join('') + `<option value="u" ${sel === 'u' ? 'selected' : ''}>직접 추가 사업장</option>`; }
 function brOptions(sel) { return `<option value="">전체 지사</option>` + BRANCHES.map(b => `<option value="${b.key}" ${b.key === sel ? 'selected' : ''}>${esc(b.name)}</option>`).join(''); }
 function jobOptions(sel, all = '전체 업종', only) { return (all ? `<option value="">${all}</option>` : '') + Object.entries(JOBS).filter(([k]) => !only || only.includes(k)).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v.ic} ${esc(v.n)}</option>`).join(''); }
-function sitesFiltered(F) { const q = (F.q || '').trim(); return SITE_LIST.filter(s => siteOk(s, { org: F.org, br: F.br }) && (!q || s.name.includes(q) || (s.addr || '').includes(q))); }
+/* 회사·조직 트리 고르기 — 통합관리 시스템 「회사·조직」과 같은 표(에스텍 그룹 → 회사 → 부문·본부 → 지사·팀) */
+function ouOptions(sel, all = '에스텍 그룹 전체') {
+  const cnt = {}; SITE_LIST.forEach(s => ouChain(siteOu(s)).forEach(o => cnt[o.id] = (cnt[o.id] || 0) + 1));
+  const out = [`<option value="">${all}</option>`];
+  const walk = (o, d) => { if (d > 0) out.push(`<option value="${o.id}" ${o.id === sel ? 'selected' : ''}>${'\u3000'.repeat(d - 1)}${d > 1 ? '└ ' : ''}${esc(o.name)}${o.kind && d > 1 ? ' · ' + esc(o.kind) : ''}${cnt[o.id] ? ` (${cnt[o.id]}곳)` : ''}</option>`); (OU_KIDS[o.id] || []).forEach(k => walk(k, d + 1)); };
+  ouRoots().forEach(r => walk(r, 0));
+  return out.join('');
+}
+function sitesFiltered(F) { const q = (F.q || '').trim(); return SITE_LIST.filter(s => siteOk(s, { ou: F.ou }) && (!q || s.name.includes(q) || (s.addr || '').includes(q))); }
 function siteBadge(s) { return s.org === 'best' ? `<span class="brb b-${s.br}">${s.br}</span>` : s.user ? '<span class="brb b-u">추가</span>' : `<span class="brb b-${s.org}">${esc(orgName(s.org).replace('에스텍', '').replace('사업본부', ''))}</span>`; }
 function curSite() { return SITE[UI.site] || null; }
 function siteBarHtml() {
   const F = UI.F || {}, s = curSite(), act = activeSiteKeys();
   const list = sitesFiltered(Object.assign({}, F, { q: V.siteQ })).sort((a, b) => (act.has(b.key) - act.has(a.key)) || a.name.localeCompare(b.name, 'ko'));
   return `<div class="sitebar">
-    <label>조직<select data-sb="org">${orgOptions(F.org || '')}</select></label>
-    ${F.org === 'best' || !F.org ? `<label>지사<select data-sb="br">${brOptions(F.br || '')}</select></label>` : ''}
+    <label class="wide">회사 · 조직 (에스텍 그룹 ${OU.length}개 조직)<select data-sb="ou">${ouOptions(F.ou || '')}</select></label>
     <label>사업장 찾기<input data-sb="q" value="${esc(V.siteQ)}" placeholder="이름·주소 일부"></label>
     <label class="wide">사업장 (● 기록 중)<select data-sb="site"><option value="">사업장을 고르세요 (${list.length}곳)</option>${list.map(x => `<option value="${x.key}" ${x.key === UI.site ? 'selected' : ''}>${act.has(x.key) ? '● ' : ''}${esc(x.name)} · ${esc(siteOrgLabel(x))} · ${x.jobs.map(j => JOBS[j] ? JOBS[j].s : j).join('/')}</option>`).join('')}</select></label>
     ${s ? `<div class="now"><b>${esc(s.name)} ${siteBadge(s)}</b><small>${esc(siteOrgLabel(s))} · ${s.jobs.map(j => JOBS[j] ? JOBS[j].ic + JOBS[j].s : j).join(' ')} · ${s.total ? s.total + '명' : '인원 미등록'}${s.shift ? ' · ' + esc(s.shift) : ''}${s.client && s.client.name ? ' · 고객사 담당 ' + esc(s.client.name) : ''}</small></div>` : ''}
@@ -4289,7 +4329,7 @@ function bindSiteBar(root, rerender) {
     const go = () => {
       if (k === 'q') { V.siteQ = el.value; clearTimeout(V.qt); V.qt = setTimeout(() => { rerender(); const i = $(`#${root.id} [data-sb="q"]`); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 350); return; }
       if (k === 'site') { UI.site = el.value; V.raId = ''; V.coId = ''; }
-      else { UI.F = Object.assign({}, UI.F, { [k]: el.value }); if (k === 'org' && el.value !== 'best') UI.F.br = ''; }
+      else { UI.F = Object.assign({}, UI.F, { [k]: el.value }); if (k === 'ou') { UI.F.org = ''; UI.F.br = ''; } }
       saveUI(); rerender();
     };
     el.addEventListener(k === 'q' ? 'input' : 'change', go);
@@ -4351,8 +4391,7 @@ RENDER.dash = function renderDash() {
   <div class="filters">
     <label class="per">기간<div class="chips">${per.map(([k, n]) => `<button class="chip" data-per="${k}" aria-pressed="${(UI.per || 'm') === k}">${n}</button>`).join('')}</div></label>
     <label class="per">기준<div class="nav"><button class="btn sm" data-nav="-1">◀</button><b style="padding:6px 4px;font-size:13px">${esc(r.label)}</b><button class="btn sm" data-nav="1">▶</button><button class="btn sm" data-nav="0">오늘</button></div></label>
-    <label>조직<select data-f="org">${orgOptions(F.org || '')}</select></label>
-    <label>지사<select data-f="br">${brOptions(F.br || '')}</select></label>
+    <label style="flex:3 1 280px">회사 · 조직<select data-f="ou">${ouOptions(F.ou || '')}</select></label>
     <label>업종<select data-f="job">${jobOptions(F.job || '')}</select></label>
   </div>
   ${G.n ? '' : `<div class="sbn">아직 기록을 시작한 사업장이 없습니다. 사업장을 골라 TBM · 위험성평가 · 점검을 기록하면 여기에 이행률이 나타납니다. 화면을 먼저 보려면 <button class="btn sm" id="dDemo">🧪 예시 자료 넣기</button> (가상 사업장 2곳 · 언제든 지움)</div>`}
@@ -4387,7 +4426,7 @@ RENDER.dash = function renderDash() {
   </div></div>`;
   host.querySelectorAll('[data-per]').forEach(b => b.onclick = () => { UI.per = b.dataset.per; saveUI(); RENDER.dash(); });
   host.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => { const n = +b.dataset.nav; UI.ref = n ? shiftRange(r, n).from : today(); saveUI(); RENDER.dash(); });
-  host.querySelectorAll('[data-f]').forEach(el => el.onchange = () => { UI.F = Object.assign({}, UI.F, { [el.dataset.f]: el.value }); if (el.dataset.f === 'org' && el.value !== 'best') UI.F.br = ''; saveUI(); RENDER.dash(); });
+  host.querySelectorAll('[data-f]').forEach(el => el.onchange = () => { UI.F = Object.assign({}, UI.F, { [el.dataset.f]: el.value }); if (el.dataset.f === 'ou') { UI.F.org = ''; UI.F.br = ''; } saveUI(); RENDER.dash(); });
   host.querySelectorAll('tr[data-site]').forEach(tr => tr.onclick = () => { UI.site = tr.dataset.site; saveUI(); setTab('tbm'); });
   host.querySelectorAll('[data-go2]').forEach(b => b.onclick = () => setTab(b.dataset.go2));
   host.querySelectorAll('[data-law]').forEach(b => b.onclick = () => lawConfirm(L.hk, b.dataset.law));
@@ -4447,6 +4486,7 @@ RENDER.set = function renderSet() {
   host.innerHTML = siteBarHtml() + `<div class="two">
   <div>${s ? `<div class="card" style="--c:#0B1F8A"><h2>🏢 사업장 안전보건 설정 — ${esc(s.name)}</h2><div class="body">
     <div class="field"><label>업종(여러 개 선택)</label><div class="chips">${Object.entries(JOBS).map(([k, j]) => `<button type="button" class="chip g" data-sj="${k}" aria-pressed="${s.jobs.includes(k)}">${j.ic} ${j.n}</button>`).join('')}</div></div>
+    <div class="field"><label>소속 회사 · 조직 (통합관리 시스템 「회사·조직」 표)</label><select id="sOu">${ouOptions(siteOu(s), '조직을 고르세요')}</select></div>
     <div class="grid2"><div class="field"><label>근무형태(TBM 기준일)</label><select id="sShift">${['', '격일제', '3조2교대', '4조3교대', '24시간 교대', '주5일', '주간 통상'].map(x => `<option ${x === (c.shift || s.shift) ? 'selected' : ''} value="${x}">${x || '사업장 목록 기준'}</option>`).join('')}</select></div>
     <div class="field"><label>관리 시작일(이행률 계산 시작)</label><input type="date" id="sStart" value="${esc(c.start || '')}"></div></div>
     <div class="grid2"><div class="field"><label>정기교육 반기 기준 시간</label><input type="number" id="sRegH" min="0" step="1" value="${esc(c.regH || EDU.reg.h)}"></div>
@@ -4458,8 +4498,8 @@ RENDER.set = function renderSet() {
     <div class="mrow"><button class="btn pri" id="sSave">💾 설정 저장</button></div>
   </div></div>` : needSite('사업장을 고르면 업종 · 근무형태 · 고객사 담당자를 설정합니다.')}
   <div class="card" style="--c:#1B7A34"><h2>➕ 목록에 없는 사업장 추가</h2><div class="body">
-    <div class="grid2"><div class="field"><label>사업장명</label><input id="aName"></div><div class="field"><label>조직</label><select id="aOrg">${ORGS.map(o => `<option value="${o.k}">${esc(o.n)}</option>`).join('')}</select></div></div>
-    <div class="grid2"><div class="field"><label>지사(에스텍베스트)</label><select id="aBr"><option value="">-</option>${BRANCHES.map(b => `<option>${b.key}</option>`).join('')}</select></div><div class="field"><label>업종</label><select id="aJob">${jobOptions('sec', '')}</select></div></div>
+    <div class="grid2"><div class="field"><label>사업장명</label><input id="aName"></div><div class="field"><label>업종</label><select id="aJob">${jobOptions('sec', '')}</select></div></div>
+    <div class="field"><label>소속 회사 · 조직</label><select id="aOu">${ouOptions(UI.F.ou || '', '조직을 고르세요')}</select></div>
     <div class="mrow"><button class="btn" id="aAdd">추가</button></div>
   </div></div></div>
   <div>
@@ -4485,12 +4525,12 @@ RENDER.set = function renderSet() {
     const jobs = new Set(s.jobs); host.querySelectorAll('[data-sj]').forEach(b => b.onclick = () => { const k = b.dataset.sj; jobs.has(k) ? jobs.delete(k) : jobs.add(k); b.setAttribute('aria-pressed', String(jobs.has(k))); });
     $('#sSave').onclick = () => {
       if (!jobs.size) return toast('업종을 하나 이상 고르세요');
-      SH.cfg[s.key] = Object.assign({}, c, { jobs: [...jobs], shift: $('#sShift').value, start: $('#sStart').value, regH: +$('#sRegH').value || EDU.reg.h, total: +$('#sTot').value || 0, on: $('#sOn').checked,
+      SH.cfg[s.key] = Object.assign({}, c, { ou: $('#sOu').value || c.ou || '', jobs: [...jobs], shift: $('#sShift').value, start: $('#sStart').value, regH: +$('#sRegH').value || EDU.reg.h, total: +$('#sTot').value || 0, on: $('#sOn').checked,
         client: { name: $('#sCN').value.trim(), pos: $('#sCP').value.trim(), tel: $('#sCT').value.trim(), co: $('#sCC').value.trim() } });
       saveSH(); queueShare('wk_' + s.key); buildSites(); toast('사업장 설정을 저장했습니다'); RENDER.set();
     };
   }
-  $('#aAdd').onclick = () => { const n = $('#aName').value.trim(); if (!n) return toast('사업장명을 넣으세요'); const key = 'u' + uid(), org = $('#aOrg').value; SH.usites.push({ key, name: n, org, br: org === 'best' ? $('#aBr').value : '', orgN: orgName(org), ind: indOf(n), jobs: [$('#aJob').value] }); saveSH(); buildSites(); UI.site = key; saveUI(); toast('추가했습니다'); RENDER.set(); };
+  $('#aAdd').onclick = () => { const n = $('#aName').value.trim(); if (!n) return toast('사업장명을 넣으세요'); const key = 'u' + uid(), ou = $('#aOu').value; if (!ou) return toast('소속 회사 · 조직을 고르세요'); const co = ouCompany(ou), ch = ouChain(ou), br = (co && co.id === 'O01' && ch.find(o => o.kind === '지사')) ? ch.find(o => o.kind === '지사').name.replace(/지사$/, '') : ''; SH.usites.push({ key, name: n, ou, org: co && co.id === 'O01' ? 'best' : (Object.keys(OU_MAP).find(k => OU_MAP[k] === (co && co.id)) || 'u'), br, orgN: ouLabel(ou), ind: indOf(n), jobs: [$('#aJob').value] }); saveSH(); buildSites(); UI.site = key; saveUI(); toast('추가했습니다'); RENDER.set(); };
   $('#shPush').onclick = async () => { if (!sbClient()) return toast('로그인한 뒤 올릴 수 있습니다'); busy(true, '올리는 중…'); await pushAllShare(); busy(false); toast(SHARE.ok ? '공유 서버에 올렸습니다' : '공유 서버가 아직 준비되지 않았습니다'); RENDER.set(); };
   $('#shPull').onclick = async () => { const n = await pullShare(periodRange('y', today())); if (n) { renderAll(); toast(`${n}건을 받았습니다`); } };
   $('#bkOut').onclick = () => download(new Blob([JSON.stringify(SH)], { type: 'application/json' }), `${fileStamp()}_에스텍_안전보건_백업.json`);
@@ -4529,6 +4569,8 @@ async function init() {
   if (!UI.F || typeof UI.F !== 'object') UI.F = {};
   applyTheme(UI.theme); renderHeader(); showGate(); initPlayer(); renderAll(); renderShareState();
   window.addEventListener('app-access', () => renderAll());
+  const ouGo = () => ouRefresh().then(ch => { if (ch) { renderAll(); toast(`에스텍 그룹 회사 · 조직 ${OU.length}개를 최신으로 반영했습니다`); } });
+  setTimeout(ouGo, 1500); setTimeout(ouGo, 8000);
   window.addEventListener('resize', () => { clearTimeout(V.rt); V.rt = setTimeout(drawCharts, 200); });
   setInterval(() => { renderShareState(); if (SHARE.ok == null && sbClient()) flushShare(); }, 15000);
   await buildSignature(kstNow()); $('#sigImg').src = VS.sig;

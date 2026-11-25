@@ -2,7 +2,7 @@
 
 <img src="icons/icon-192.png" width="96" alt="에스텍 안전보건 관리 시스템 아이콘">
 
-**에스텍 그룹 안전보건 관리 시스템 (중대재해처벌법 대응)** · v1.0.1 · 통합관리 시스템 메인 화면 「근태관리」 다음 카드 (`stsh`)
+**에스텍 그룹 안전보건 관리 시스템 (중대재해처벌법 대응)** · v1.0.2 · 통합관리 시스템 메인 화면 「근태관리」 다음 카드 (`stsh`)
 
 > 당사(사업주)와 고객사(도급인)가 각자 지는 안전보건 확보 의무를 **「했다」는 기록**으로 남깁니다.
 > 사고가 난 뒤에는 기록이 없으면 이행한 것으로 인정받기 어렵습니다. 위험성평가 · TBM · 안전점검 · 아차사고 · 교육 · 보호구 · 도급인 협의를 사업장별로 한곳에 쌓습니다.
@@ -12,7 +12,7 @@
 | 구분 | 주소 |
 |---|---|
 | 웹 버전 | https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/ |
-| 파일 하나로 여는 배포본 | `releases/S-Tec-Safety-and-Health-Management-System_v1.0.1.html` |
+| 파일 하나로 여는 배포본 | `releases/S-Tec-Safety-and-Health-Management-System_v1.0.2.html` |
 | 안드로이드 앱 (최신) | https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk |
 
 - **APK는 GitHub Actions가 만듭니다.** `index.html`·`version.json`을 올리면 Actions 「Android APK」가 약 5분 뒤 `releases/`와 릴리스에 APK를 올립니다.
