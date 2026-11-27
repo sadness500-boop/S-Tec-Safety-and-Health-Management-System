@@ -373,7 +373,7 @@ LPS['2-2'] = async (c, L) => { const e = fOf(L, 'field'); return e && !c.online 
 LPS['2-3'] = async (c, L) => {
   if (c.online) return [];
   const out = [];
-  for (const e of L.forms.filter(x => /^m\d+$/.test(x.var)).sort((a, b) => +a.var.slice(1) - +b.var.slice(1))) {
+  for (const e of L.forms.filter(x => /^m\d+$/.test(x.var) && (!c.per || !c.per.m || +x.var.slice(1) === c.per.m)).sort((a, b) => +a.var.slice(1) - +b.var.slice(1))) {
     const m = +e.var.slice(1), rec = Object.values(SH.edu).find(x => (x.site === c.s.key) && x.type === 'reg' && +String(x.d).slice(5, 7) === m && String(x.d).startsWith(String(c.y)));
     const dx = await lpFormDx(e); dx.stripNotes();
     lpEduFill(dx, c, { date: rec ? `${+rec.d.slice(5, 7)} / ${+rec.d.slice(8, 10)}` : `${m} /`, names: rec ? (rec.att || []).map(id => workerName(c.s.key, id)).filter(Boolean) : c.names });
@@ -472,7 +472,8 @@ LPS['4-6'] = async (c, L) => {
 };
 LPS['4-7'] = async (c, L) => { const out = []; for (const e of L.forms) out.push(lpExt(e.k) === 'pptx' ? await lpPptx(c, e) : await lpStd(c, e)); return out; };
 LPS['4-8'] = async (c, L) => [await lpStd(c, L.forms[0], dx => {
-  dx.repeat(4, (g, i) => { const m = 6 + i; dx.repl([[/^(사업장명\s*:)\s{3,}(작업장소\s*:)\s*(.*?)(측정일자\s*:)\s*년\s*월\s*일/g, `$1 ${c.s.name}     $2 ${hasJ(c.s, 'sec', 'prk') ? '정문 · 외곽' : '옥외 작업장'}     $4 ${c.y}년 ${m}월     일`]], g);
+  const MM = c.per && c.per.m ? [c.per.m] : [6, 7, 8, 9];
+  dx.repeat(MM.length, (g, i) => { const m = MM[i]; dx.repl([[/^(사업장명\s*:)\s{3,}(작업장소\s*:)\s*(.*?)(측정일자\s*:)\s*년\s*월\s*일/g, `$1 ${c.s.name}     $2 ${hasJ(c.s, 'sec', 'prk') ? '정문 · 외곽' : '옥외 작업장'}     $4 ${c.y}년 ${m}월     일`]], g);
     dx.tables(g).forEach(t => dx.rows(t).forEach(r => dx.cells(r).forEach(tc => { if (dx.ct(tc) === '홍길동') dx.setCell(tc, c.mgr); if (dx.ct(tc) === '예시') dx.setCell(tc, ''); }))); }); })];
 /* 5장 */
 LPS['5-1'] = async (c, L) => {
@@ -502,7 +503,8 @@ LPS['5-3'] = async (c, L) => {
   for (const e of L.site) out.push(await lpSite(c, e));
   const d = fOf(L, 'drill');
   if (d) { const dx = await lpFormDx(d); dx.stripNotes();
-    dx.repeat(4, (g, q) => { const s = sc[q % sc.length] || sc[0];
+    const Q = c.per && c.per.q ? [c.per.q - 1] : [0, 1, 2, 3];
+    dx.repeat(Q.length, (g, qi) => { const q = Q[qi], s = sc[q % sc.length] || sc[0];
       dx.tables(g).forEach(t => dx.rows(t).forEach(r => { const cs = dx.cells(r); cs.forEach((tc, k) => { const x = dx.ct(tc).replace(/\s/g, '');
         if (x === '훈련명' && cs[k + 1]) dx.setCell(cs[k + 1], `${s[0]} 발생에 따른 비상 대응훈련 (${q + 1}분기)`);
         if (x === '훈련일시' && cs[k + 1]) dx.setCell(cs[k + 1], `${c.y}년 ${String((q + 1) * 3).padStart(2, '0')}월    일(   :    ~    :   )`);
@@ -512,7 +514,7 @@ LPS['5-3'] = async (c, L) => {
       dx.tables(g).forEach(t => { const rows = dx.rows(t); const hi = rows.findIndex(r => /대\s*응\s*활\s*동/.test(dx.ct(r))); if (hi >= 0 && rows[hi + 1]) { const cs = dx.cells(rows[hi + 1]); if (cs.length >= 2) { dx.setCell(cs[0], s[2]); dx.setCell(cs[1], s[3].map(x => '■ ' + x).join('\n')); if (cs[2]) dx.setCell(cs[2], '비상연락망 및 대피장소 참고'); } }
         const hj = rows.findIndex(r => /문제점\s*및\s*개선방안/.test(dx.ct(r))); if (hj >= 0 && rows[hj + 1]) { const cs = dx.cells(rows[hj + 1]); if (cs.length >= 2) { dx.setCell(cs[0], s[2]); dx.setCell(cs[1], ''); } } });
       dx.repl([[/^20\d{2}년\s*00월\s*00일\s+.*\(서명\)$/g, `${c.y}년    월    일      ${c.mgr} ${c.mgrPos} (서명)`]], g); });
-    dx.repl(lpRules(c)); out.push({ name: `${c.y} 비상대응 훈련계획 및 결과(분기).docx`, blob: await dx.blob(), kind: 'form', t: '비상대응 훈련계획 및 결과(분기)' }); }
+    dx.repl(lpRules(c)); out.push({ name: c.per && c.per.q ? `${c.y} ${c.per.q}분기 비상대응 훈련계획 및 결과.docx` : `${c.y} 비상대응 훈련계획 및 결과(분기).docx`, blob: await dx.blob(), kind: 'form', t: '비상대응 훈련계획 및 결과(분기)' }); }
   const ct = fOf(L, 'contact');
   if (ct) out.push(await lpPptx(c, ct, (d) => {
     const tbl = [...d.getElementsByTagNameNS(ANS, 'tbl')][0]; if (!tbl) return; const rows = [...tbl.getElementsByTagNameNS(ANS, 'tr')];
@@ -538,11 +540,11 @@ LPS['7-3'] = async (c, L) => {
  * 항목 만들기 · 대장 전체(ZIP)
  * ===================================================================== */
 const LP_DIR = { 0: '0_표지_및_목차', 1: '1_안전보건관리체계_구축', 2: '2_안전보건교육', 3: '3_사업장_안전관리', 4: '4_사업장_보건관리', 5: '5_중대산업재해_관리', 6: '6_도급시_산업재해예방', 7: '7_기타_안전관리_준수사항' };
-async function lpBuildItem(s, id) {
-  await lpInit(); const c = ledCtx(s), L = lpFor(c, id), out = [];
+async function lpBuildItem(s, id, per) {
+  await lpInit(); const c = ledCtx(s), L = lpFor(c, id), out = []; if (per) c.per = per;
   const fn = LPS[id];
   if (fn && (L.forms.length || L.site.length)) { try { out.push(...await fn(c, L)); } catch (e) { console.error(id, e); out.push({ name: `${id}_작성오류.txt`, blob: new Blob([`${id} 작성 중 오류: ${e.message || e}`]), kind: 'err', t: '오류' }); } }
-  for (const e of L.orig) out.push(await lpOrig(e));
+  for (const e of L.orig) if (!per || (per.origRe && per.origRe.test(`${e.name || ''} ${e.title || ''}`))) out.push(await lpOrig(e));
   return out;
 }
 const lpCount = (s, id) => { if (!lpHas()) return null; const L = lpFor(ledCtx(s), id); return { forms: L.forms.length, site: L.site.length, orig: L.orig.length }; };
@@ -551,30 +553,64 @@ async function lpOutItem(s, id) {
   try {
     const it = LED_ID[id], files = await lpBuildItem(s, id);
     if (!files.length) { toast('이 항목은 회사 양식 · 원본이 없습니다 — 간이 서식으로 만듭니다'); busy(false); return ledOutItem(s, id, 'docx'); }
-    if (files.length === 1) await download(files[0].blob, `${fileStamp()}_${safeName(s.name)}_${id}_${safeName(files[0].name)}`);
-    else { const z = new JSZip(); files.forEach(f => z.file(`${f.kind === 'orig' ? '원본_' : ''}${safeName(f.name)}`, f.blob)); await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${fileStamp()}_${safeName(s.name)}_${id}_${safeName(it.t)}.zip`); }
+    const sorted = files.map((f, i) => Object.assign(f, { _i: i })).sort((x, y) => (lpKindOrder[x.kind] || 0) - (lpKindOrder[y.kind] || 0) || x._i - y._i);
+    if (sorted.length === 1) await download(sorted[0].blob, lpNm(`${id}-01 ${s.name} ${sorted[0].name}`));
+    else { const z = new JSZip(), dir = `${lpItDir(it)}/`; sorted.forEach((f, i) => z.file(`${dir}${id}-${String(i + 1).padStart(2, '0')} ${lpNm((f.kind === 'orig' ? '[원본] ' : f.kind === 'site' ? '[사업장] ' : '') + f.name)}`, f.blob)); await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), lpNm(`${fileStamp()} ${s.name} ${id}. ${it.t}.zip`)); }
     ledMarkGen(s.key, [id]); toast(`${id} ${it.t} — 회사 양식 ${files.filter(f => f.kind !== 'orig').length}개 · 원본 ${files.filter(f => f.kind === 'orig').length}개`, 3500);
   } catch (e) { console.error(e); toast('작성하지 못했습니다: ' + (e.message || e), 5000); }
   finally { busy(false); RENDER.led(); }
 }
+/* 대장 전체 — 「안전보건관리대장 목차」 순서 그대로: 0 표지·목차 → 1장(1-0 목차, 1-1 ~ 1-8) → … → 7장(7-4)
+ *  폴더 · 파일 이름 앞에 목차 번호 · 순번을 붙여 탐색기에서 이름순으로 보면 목차 순서가 됨 · 해당 없음 항목도 사유 파일로 자리 유지 */
+const LP_CHT = { 0: '0. 표지 및 목차', 1: '1. 안전보건관리체계 구축', 2: '2. 안전보건교육', 3: '3. 사업장 안전관리', 4: '4. 사업장 보건관리', 5: '5. 중대산업재해 관리', 6: '6. 도급시 산업재해 예방', 7: '7. 기타 안전관리 준수사항' };
+/* 파일 이름 — 목차 표기 그대로(띄어쓰기 · 점 유지) · 쓸 수 없는 글자만 바꿈 */
+const lpNm = t => String(t || '').replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, ' ').trim().slice(0, 80);
+const lpChDir = ch => lpNm(LP_CHT[ch]);
+const lpItDir = it => lpNm(`${it.id}. ${it.t}`);
+const lpKindOrder = { form: 0, site: 1, orig: 2, err: 3 };
 async function lpFullZip(s, zip, root, shared) {
-  const c = ledCtx(s);
-  for (const it of [{ id: '0', ch: 0, t: '표지 및 목차' }].concat(LED)) {
-    if (it.id !== '0' && ledApp(s, it).v === 'n') continue;
-    const files = await lpBuildItem(s, it.id), dir = `${root}${LP_DIR[it.ch]}/${it.id === '0' ? '' : `${it.id}_${safeName(it.t)}/`}`;
-    if (!files.length && it.id !== '0' && LG[it.id]) { zip.file(`${dir}${it.id}_${safeName(it.t)}(간이서식).docx`, await packDocx(blocksToDocx(ledBlocks(s, it.id)), s.name)); continue; }
-    files.forEach(f => {
-      if (shared && f.kind === 'orig' && f.shared) { const k = `${LP_DIR[it.ch]}/${it.id}/${f.name}`; if (!shared.has(k)) { shared.add(k); zip.file(`공통원본(회사·지사)/${LP_DIR[it.ch]}/${it.id === '0' ? '' : `${it.id}_${safeName(it.t)}/`}${safeName(f.name)}`, f.blob); } return; }
-      zip.file(`${dir}${f.kind === 'orig' ? '[원본] ' : f.kind === 'site' ? '[사업장] ' : ''}${safeName(f.name)}`, f.blob); });
-    const st = ((SH.led[s.key] || {}).it || {})[it.id] || {};
-    for (const f of (st.files || [])) { const b = await ldbGet(f.key).catch(() => null); if (b) zip.file(`${dir}[첨부] ${safeName(f.n)}`, b); }
+  const c = ledCtx(s), put = (dir, n, name, blob) => zip.file(`${dir}${n} ${lpNm(name)}`, blob);
+  // 0. 표지 및 목차 — 표지 · 전체 목차만, 장 목차는 각 장 폴더의 맨 앞(X-0)으로
+  const zero = await lpBuildItem(s, '0'), chToc = {};
+  let k0 = 0; const d0 = `${root}${lpChDir(0)}/`;
+  zero.forEach(f => { const m = /^(\d)장_목차/.exec(f.name.replace(/\s/g, '_')) || /^(\d)장 목차/.exec(f.t || ''); if (m) { chToc[m[1]] = f; return; } put(d0, `0-${++k0}`, f.name, f.blob); });
+  if (!zero.length) put(d0, '0-1', '안전보건관리대장(표지·목차).docx', await packDocx(blocksToDocx(ldFix(LG['0'](c))), s.name));
+  for (let ch = 1; ch <= 7; ch++) {
+    const cd = `${root}${lpChDir(ch)}/`;
+    if (chToc[ch]) put(cd, `${ch}-0`, `${LP_CHT[ch].replace(/^\d\.\s*/, '')} 목차.docx`, chToc[ch].blob);
+    for (const it of LED.filter(x => x.ch === ch)) {
+      const dir = `${cd}${lpItDir(it)}/`, ap = ledApp(s, it);
+      if (ap.v === 'n') { put(dir, `${it.id}-00`, '해당없음.txt', new Blob([`${it.id} ${it.t}\n${it.docs}\n\n이 사업장은 해당 없음(n/a) — ${ap.why}\n${s.name} · ${fmtDs(today())}`], { type: 'text/plain' })); continue; }
+      let files = await lpBuildItem(s, it.id);
+      if (!files.length && LG[it.id]) files = [{ name: `${it.t}(간이서식).docx`, blob: await packDocx(blocksToDocx(ledBlocks(s, it.id)), s.name), kind: 'form' }];
+      files = files.map((f, i) => Object.assign(f, { _i: i })).sort((x, y) => (lpKindOrder[x.kind] || 0) - (lpKindOrder[y.kind] || 0) || x._i - y._i);
+      let n = 0;
+      files.forEach(f => {
+        const tag = f.kind === 'orig' ? '[원본] ' : f.kind === 'site' ? '[사업장] ' : '';
+        if (shared && f.kind === 'orig' && f.shared) { const key = `${it.id}/${f.name}`; if (!shared.has(key)) { shared.add(key); zip.file(`공통원본(회사·지사)/${lpChDir(ch)}/${lpItDir(it)}/${lpNm(f.name)}`, f.blob); } return; }
+        put(dir, `${it.id}-${String(++n).padStart(2, '0')}`, tag + f.name, f.blob);
+      });
+      const st = ((SH.led[s.key] || {}).it || {})[it.id] || {};
+      for (const f of (st.files || [])) { const b = await ldbGet(f.key).catch(() => null); if (b) put(dir, `${it.id}-${String(++n).padStart(2, '0')}`, '[첨부] ' + f.n, b); }
+    }
   }
   ledMarkGen(s.key, LED.filter(it => ledApp(s, it).v !== 'n' && it.kind !== 'ext').map(it => it.id));
+}
+/* 빈 회사 양식(사업장 미지정) — 항목의 회사 양식 원본 그대로 */
+async function lpBlankItem(id) {
+  await lpInit(); if (!lpHas()) return toast('먼저 회사 양식팩을 불러오세요');
+  const it = LED_ID[id] || { id, t: '표지 및 목차' }, F = LP.man.files.filter(x => x.item === id && (x.kind === 'f' || (x.kind === 'o' && /^(all|co-best)$/.test(x.scope))));
+  if (!F.length) return toast('이 항목은 회사 양식이 없습니다 — 사업장을 고르면 간이 서식으로 만들 수 있습니다');
+  busy(true, `${id} 빈 양식 준비 중…`);
+  try { const z = new JSZip(); let n = 0; for (const e of F) z.file(`${id}-${String(++n).padStart(2, '0')}_${e.kind === 'o' ? '[원본] ' : ''}${safeName(e.name.replace(/^[0-9a-f]{12}_/, ''))}`, await lpBlob(e.k));
+    if (F.length === 1) await download(await lpBlob(F[0].k), `${id}_${safeName(F[0].name.replace(/^[0-9a-f]{12}_/, ''))}`);
+    else await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${id}_${safeName(it.t)}_회사양식.zip`); }
+  finally { busy(false); }
 }
 async function lpOutFull(s) {
   const z = new JSZip();
   try { busy(true, `${s.name} 관리대장 — 회사 양식으로 작성 중…`); await lpFullZip(s, z, ''); busy(true, 'ZIP 묶는 중…');
-    await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${fileStamp()}_${safeName(s.name)}_${s && today().slice(0, 4)}년_안전보건관리대장.zip`); toast('관리대장을 회사 양식 폴더 구성 그대로 만들었습니다', 3500); }
+    await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), lpNm(`${fileStamp()} ${s.name} ${today().slice(0, 4)}년 안전보건관리대장.zip`)); toast('관리대장을 회사 양식 폴더 구성 그대로 만들었습니다', 3500); }
   catch (e) { console.error(e); toast('만들지 못했습니다: ' + (e.message || e), 5000); }
   finally { busy(false); RENDER.led(); }
 }
@@ -585,7 +621,7 @@ async function lpBatch(sites) {
   try {
     for (let pi = 0; pi < parts; pi++) {
       const z = new JSZip(), shared = new Set(), part = sites.slice(pi * per, pi * per + per);
-      for (let i = 0; i < part.length; i++) { const s = part[i]; busy(true, `관리대장 작성 중… ${pi * per + i + 1}/${sites.length} ${s.name}`); await lpFullZip(s, z, `${safeName(siteOrgLabel(s) || '기타')}/${safeName(s.name)}/`, shared); await new Promise(r => setTimeout(r, 0)); }
+      for (let i = 0; i < part.length; i++) { const s = part[i]; busy(true, `관리대장 작성 중… ${pi * per + i + 1}/${sites.length} ${s.name}`); await lpFullZip(s, z, `${lpNm(siteOrgLabel(s) || '기타')}/${lpNm(s.name)}/`, shared); await new Promise(r => setTimeout(r, 0)); }
       busy(true, `ZIP 묶는 중… ${pi + 1}/${parts}`);
       await download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), `${fileStamp()}_안전보건관리대장_${sites.length}곳${parts > 1 ? `_${pi + 1}of${parts}` : ''}.zip`);
     }

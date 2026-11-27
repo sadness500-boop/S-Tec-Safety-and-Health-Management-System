@@ -680,7 +680,7 @@ function ledFullBlocks(s, opt = {}) {
     const its = LED.filter(it => it.ch === ch), ap = its.map(it => [it, ledApp(s, it)]);
     B.push({ k: 'pb' }, { k: 'title', t: `${ch}. ${LED_CH[ch]}`, sub: c.s.name },
       { k: 'table', head: ['No', '비치 서류', '적용', '비치 확인'], w: [.5, 4.4, .6, .9], align: ['c', '', 'c', 'c'], rows: ap.map(([it, a]) => [it.id, `□ ${it.t} (${it.docs})`, LED_V[a.v][0], (((ledAll()[s.key] || {}).it || {})[it.id] || {}).ok ? '✔' : '']) });
-    ap.filter(([, a]) => a.v !== 'n').forEach(([it]) => { if (LG[it.id]) B.push({ k: 'pb' }, ...LG[it.id](c)); });
+    ap.forEach(([it, a]) => { B.push({ k: 'pb' }, { k: 'h', t: `${it.id}. ${it.t}` }); if (a.v === 'n') B.push({ k: 'p', t: `해당 없음(n/a) — ${a.why}`, size: 18, color: C.gray }); else if (LG[it.id]) B.push(...LG[it.id](c)); else B.push({ k: 'p', t: `${it.docs} — 별도 비치`, size: 18, color: C.gray }); });
   }
   B.push({ k: 'p', t: `작성: ${APP.ko} ${APP.version} · ${fmtDs(today())} · Designed & Developed by Rat Rae Choi`, size: 14, color: C.gray });
   return ldFix(B);
@@ -733,8 +733,12 @@ RENDER.led = function renderLed() {
   const host = $('#p-led'), s = curSite();
   if (!LP.tried) { LP.tried = true; lpInit().then(m => { if (m && UI.tab === 'led') RENDER.led(); }); }
   if (!s) {
-    host.innerHTML = siteBarHtml() + `<div class="card" style="--c:#1B7A34"><h2>📒 안전보건 관리대장 <span class="r">7장 46항목 · 모든 서류 3년 이상 보존</span></h2><div class="body"><p>회사가 중점 관리하는 「안전보건관리대장」 서류철을 사업장별로 만들고 비치 여부를 관리합니다. 사업장을 고르면 그 사업장에 해당하는 항목과 서류가 자동으로 정해집니다.</p></div></div>` + lpCardHtml() + ledOrgCard();
-    bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host); return;
+    host.innerHTML = siteBarHtml() + `<div class="two"><div><div class="card" style="--c:#1B7A34"><h2>📒 ${today().slice(0, 4)}년 안전보건관리 대장 — 목차 <span class="r">7장 ${LED.length}항목 · 모든 서류 3년 이상 보존</span></h2><div class="body"><p>회사가 중점 관리하는 「안전보건관리대장」 서류철의 목차입니다. 위에서 <b>사업장을 고르면</b> 그 사업장의 업종(보안 / 시설·미화) · 인원에 맞춰 해당 항목(○)과 해당 없음(n/a)이 정해지고, 항목별 서류를 목차 순서대로 작성합니다.</p>${lpHas() ? '<p class="hint">사업장을 고르지 않아도 「📄 빈 양식」으로 회사 양식 원본을 내려받을 수 있습니다.</p>' : ''}</div></div>
+      <div class="lchs">${ledTocHtml()}</div></div><div>${lpCardHtml()}${ledOrgCard()}${perOrgCard()}</div></div>`;
+    bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host); perBindOrg(host);
+    host.querySelectorAll('[data-lb]').forEach(b => b.onclick = () => lpBlankItem(b.dataset.lb));
+    host.querySelectorAll('details.lch').forEach(d => d.ontoggle = () => { LV.tocOpen = LV.tocOpen || {}; LV.tocOpen[d.dataset.ch] = d.open; });
+    return;
   }
   const c = ledCtx(s), st = ledStat(s), box = ledAll()[s.key] || { it: {} };
   const chs = [1, 2, 3, 4, 5, 6, 7].map(ch => {
@@ -743,7 +747,7 @@ RENDER.led = function renderLed() {
     return `<details class="lch" ${LV.open[ch] ? 'open' : ''} data-ch="${ch}"><summary><b>${ch}. ${esc(LED_CH[ch])}</b><span class="lcnt">${need.length ? `${done}/${need.length} 비치` : '해당 없음'}</span><div class="lbar sm"><i style="width:${need.length ? Math.round(done / need.length * 100) : 0}%"></i></div></summary>
       ${ap.map(([it, a, x]) => { const V = LED_V[a.v], K = LED_KIND[it.kind];
         return `<div class="lrow ${a.v === 'n' ? 'na' : x.ok ? 'ok' : ''}"><span class="lno">${it.id}</span>
-        <div class="lt"><b>${esc(it.t)} <span class="tag" style="--c:${K[1]}">${K[0]}</span></b><small>${esc(it.docs)}</small><small class="lwhy">${esc(a.why)}</small>
+        <div class="lt"><b>${esc(it.t)} <span class="tag" style="--c:${K[1]}">${K[0]}</span></b><small>${esc(it.docs)}</small><small class="lwhy">${esc(a.why)}</small>${a.v !== 'n' ? perItemNote(s, it.id, perY()) : ''}
           ${(x.files || []).length ? `<div class="lfiles">${x.files.map(f => `<span class="lfile"><a href="#" data-lf="${esc(f.key)}">📎 ${esc(f.n)}</a><button type="button" data-lx="${esc(f.key)}" data-li="${it.id}" title="첨부 삭제">✕</button></span>`).join('')}</div>` : ''}</div>
         <button type="button" class="lv" style="--c:${V[2]}" data-lv="${it.id}" title="눌러서 적용 바꾸기 (자동 → ○ → n/a)">${V[0]}<small>${(box.info && box.info.ov && box.info.ov[it.id]) ? '직접' : '자동'}</small></button>
         <span class="lst">${a.v === 'n' ? '—' : x.ok ? `✔ 비치<small>${fmtDs(x.okD || x.gen || today())}</small>` : '<em>미비치</em>'}</span>
@@ -752,18 +756,19 @@ RENDER.led = function renderLed() {
   host.innerHTML = siteBarHtml() + `<div class="two"><div>
     <div class="card" style="--c:#0B1F8A"><h2>📒 ${c.y}년 안전보건 관리대장 — ${esc(s.name)} <span class="r">${esc(LED_FORM_N[c.form])}</span></h2><div class="body">
       <div class="lprof"><div><small>회사</small><b>${esc(c.co.n)}</b></div><div><small>업종(직종)</small><b>${esc(c.jobsN)}</b></div><div><small>산업</small><b>${c.ind.ic || ''} ${esc(c.ind.n)}</b></div><div><small>근로자</small><b>${c.total || '-'}명</b></div><div><small>관리감독자</small><b>${esc(c.mgr || '미등록')}</b></div></div>
-      <div class="lsum"><div class="lbar big"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b><span>해당 ${st.need}항목 중 ${st.done}항목 비치 · 해당 없음 ${st.na}항목</span></div>
+      <div class="lsum"><div class="lbar big"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b><span>해당 ${st.need}항목 중 ${st.done}항목 비치 · 해당 없음 ${st.na}항목${(() => { const p = perStat(s, perY()); return p.miss ? ` · <b style="color:#C62828">시기별 서류 누락 ${p.miss}건</b>` : ''; })()}</span></div>
       <div class="row" style="margin-top:10px">${lpHas() ? `<button class="btn pri" id="lFullZ">📚 대장 전체 — 회사 양식 (ZIP)</button>` : `<button class="btn pri" id="lFullW">📚 대장 전체 간이 Word</button><button class="btn" id="lFullP">📚 간이 PDF</button>`}<button class="btn" id="lImp">📥 양식·서류 불러오기</button><button class="btn" id="lInfo">⚙ 대장 기본정보</button>
         <label class="chk" style="margin-left:auto"><input type="checkbox" id="lAtt" ${LV.attach ? 'checked' : ''}> 첨부 원본(사진 · PDF)도 대장에 넣기</label></div>
       ${lpHas() ? `<p class="hint">「📄 회사 양식」을 누르면 <b>회사가 배포한 양식 그대로</b> ${esc(c.jobsS)} 업종 · ${esc(c.ind.n)} 특성 · 근무자 명부(${c.names.length}명)로 채워 작성하고, 이수증 · 수료증 · 경영방침 같은 원본은 그대로 함께 내려받습니다. 사업장에 이미 회사 서식으로 만든 서류(조직도 · 지정서 · 근골격계 조사 · 예산 · 훈련)가 있으면 그 서류를 씁니다.</p>` : ''}<p class="hint" ${lpHas() ? 'hidden' : ''}>「📄 Word · PDF」를 누르면 프로그램이 ${esc(c.jobsS)} 업종 · ${esc(c.ind.n)} 특성과 근무자 명부(${c.names.length}명) · 위험성평가 · 교육 · 보호구 · 점검 기록으로 서류를 작성합니다. 출력해 서명받고 비치한 뒤 「비치 확인」을 누르세요. 수료증 · 확인서처럼 밖에서 받는 서류는 「📎 첨부」로 원본을 넣습니다.</p>
     </div></div>
+    ${perCardHtml(s)}
     <div class="lchs">${chs}</div></div>
     <div>${lpCardHtml()}<div class="card" style="--c:#1B7A34"><h2>📥 양식 · 서류 불러오기</h2><div class="body">
       <p>회사 양식이나 기존 서류(Word · PPT · PDF · 사진)를 불러오면 어느 대장 항목인지 알아보고, <b>이 사업장 또는 조직 전체 사업장</b>마다 업종 · 산업 · 직종에 맞춰 서류를 작성합니다.</p>
       <ul class="hl"><li>Word · PPT 양식 → 서식 그대로 사업장명 · 소속 · 주소 · 업종 체크 · 날짜 · 근무자 성명을 채움</li><li>PDF · 사진 → 원본을 그대로 붙이고 같은 종류 서류를 프로그램이 작성</li><li>원본은 관리대장 해당 항목에 첨부(비치)</li></ul>
       <button class="btn pri" id="lImp2">📥 불러오기 시작</button></div></div>
-      ${ledOrgCard()}</div></div>`;
-  bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host);
+      ${ledOrgCard()}${perOrgCard()}</div></div>`;
+  bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host); perBind(host, s); perBindOrg(host);
   host.querySelectorAll('details.lch').forEach(d => d.ontoggle = () => { LV.open[d.dataset.ch] = d.open; });
   host.querySelectorAll('[data-lw]').forEach(b => b.onclick = () => ledOutItem(s, b.dataset.lw, 'docx'));
   host.querySelectorAll('[data-lp]').forEach(b => b.onclick = () => ledOutItem(s, b.dataset.lp, 'pdf'));
@@ -780,6 +785,15 @@ RENDER.led = function renderLed() {
   $('#lInfo').onclick = () => ledInfoModal(s);
   $('#lImp').onclick = $('#lImp2').onclick = () => ledImportModal(s);
 };
+/* 사업장 미지정 목차 — 대장 목차표 그대로(보안 / 시설·미화 양식별 ○ · n/a) */
+function ledTocHtml() {
+  const V = v => `<span class="lv" style="--c:${LED_V[v][2]};cursor:default">${LED_V[v][0]}</span>`, op = LV.tocOpen || { 0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true };
+  const blank = id => lpHas() && LP.man.files.some(x => x.item === id && x.kind === 'f') ? `<button class="btn sm" data-lb="${id}">📄 빈 양식</button>` : '';
+  const ch0 = `<details class="lch" ${op[0] ? 'open' : ''} data-ch="0"><summary><b>0. 표지 및 목차</b><span class="lcnt">표지 · 목차</span></summary>
+    <div class="lrow ltoc"><span class="lno">0</span><div class="lt"><b>안전보건관리대장 표지 · 목차</b><small>사업장별 표지([사업장명]) · 전체 목차 · 장별 목차</small></div><span class="lsec">${V('o')}</span><span class="letc">${V('o')}</span><div class="lact">${blank('0')}</div></div></details>`;
+  return `<div class="ltoch"><span>No · 내용 (비치 서류)</span><span>보안</span><span>시설·미화</span><span></span></div>` + ch0 + [1, 2, 3, 4, 5, 6, 7].map(ch => `<details class="lch" ${op[ch] ? 'open' : ''} data-ch="${ch}"><summary><b>${ch}. ${esc(LED_CH[ch])}</b><span class="lcnt">${LED.filter(x => x.ch === ch).length}항목</span></summary>
+    ${LED.filter(x => x.ch === ch).map(it => { const K = LED_KIND[it.kind]; return `<div class="lrow ltoc"><span class="lno">${it.id}</span><div class="lt"><b>${esc(it.t)} <span class="tag" style="--c:${K[1]}">${K[0]}</span></b><small>${esc(it.docs)}</small>${['1-5', '1-6'].includes(it.id) ? '<small class="lwhy">상시근로자 50인 이상</small>' : it.id === '1-7' ? '<small class="lwhy">상시근로자 20~49인</small>' : it.ch === 6 ? '<small class="lwhy">당사가 도급인일 때</small>' : ''}${PER.filter(e => e.id === it.id).map(e => `<small class="lper">📅 ${PER_CY[e.cy]} 작성 · 비치 — ${esc(e.t)}</small>`).join('')}</div><span class="lsec">${V(it.sec)}</span><span class="letc">${V(it.etc)}</span><div class="lact">${blank(it.id)}</div></div>`; }).join('')}</details>`).join('');
+}
 function ledBindOrg(host) {
   const b = host.querySelector('#lBatch'); if (b) b.onclick = () => lpHas() ? lpBatch(ledSitesInScope()) : ledBatch(ledSitesInScope(), 'docx');
   const i = host.querySelector('#lImpAll'); if (i) i.onclick = () => ledImportModal(curSite(), true);

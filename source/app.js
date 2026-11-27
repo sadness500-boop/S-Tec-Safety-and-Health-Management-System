@@ -11,7 +11,7 @@ const APP = {
   ko: '에스텍 안전보건 관리 시스템',
   sub: '중대재해처벌법 대응',
   code: 'stsh',
-  version: 'v1.2.0',
+  version: 'v1.3.0',
   build: '2026-11-25',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk',
