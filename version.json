@@ -1,7 +1,7 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "date": "2026-11-27",
-  "note": "📒 관리대장 출력물을 대장 목차 순서(0. 표지 및 목차 → 1-1 … → 7. 기타)로 생성 · 사업장 미지정 시에도 목차 표시 · 📅 시기별 작성·비치 서류(월·분기·반기·연) 비치/누락 확인과 이번 기간·1년치 서류 자동 준비",
-  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.3.0.html",
-  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.3.0.apk"
+  "note": "프로그램별 관리범위 — 통합관리 콘솔에서 조직별로 ✏️수정 / 👁보기 지정 시 지정한 조직의 사업장만 보이고, 👁보기 사업장은 저장되지 않음",
+  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.3.1.html",
+  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.3.1.apk"
 }

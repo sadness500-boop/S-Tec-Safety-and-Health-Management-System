@@ -11,8 +11,8 @@ const APP = {
   ko: '에스텍 안전보건 관리 시스템',
   sub: '중대재해처벌법 대응',
   code: 'stsh',
-  version: 'v1.3.0',
-  build: '2026-11-25',
+  version: 'v1.3.1',
+  build: '2026-11-27',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk',
   repo: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System',
@@ -95,6 +95,7 @@ const whoAmI = () => (UI.manager && [UI.manager.title, UI.manager.name].filter(B
 
 /* 기록 저장 — 변경 이력 · 원본 해시(위변조 대비) · 공유 서버 대기열 */
 function putRec(kind, r, act) {
+  if (roBlock(r && r.site)) return r;
   const box = SH[kind], now = new Date().toISOString();
   if (!r.id) r.id = kind + '_' + uid();
   const old = box[r.id];
@@ -105,7 +106,7 @@ function putRec(kind, r, act) {
   sha256(base).then(h => { if (h && box[r.id] === r) { r.hash = h; saveSH(); } });
   return r;
 }
-function delRec(kind, id) { delete SH[kind][id]; saveSH(); queueShare(id, true); }
+function delRec(kind, id) { const o = SH[kind][id]; if (o && roBlock(o.site)) return; delete SH[kind][id]; saveSH(); queueShare(id, true); }
 const kindOf = id => (String(id).match(/^([a-z]+)_/) || [])[1];
 function recById(id) { const k = kindOf(id); return k && SH[k] ? SH[k][id] : null; }
 
@@ -169,10 +170,25 @@ function siteOk(s, F) {
   if (F.org && (F.org === 'u' ? !s.user : s.org !== F.org)) return false;
   if (F.br && s.br !== F.br) return false;
   if (F.job && !s.jobs.includes(F.job)) return false;
-  const allow = window.APP_ACCESS && APP_ACCESS.branches && APP_ACCESS.branches.length ? APP_ACCESS.branches : null;
-  if (allow && s.org === 'best' && !allow.includes(s.br)) return false;
+  const allow = appBranches().old;
+  if (allow.length && s.org === 'best' && !allow.includes(s.br)) return false;
+  if (sitePerm(s) === null) return false;
   return true;
 }
+/* v1.3.1 프로그램별 관리범위 — 통합관리 콘솔 「🔐 프로그램별 권한」에서 조직별로 ✏️수정('e:조직id') / 👁보기('v:조직id') 지정
+   가장 가까운 상위 조직의 지정이 적용 · 지정이 하나도 없으면 전체 수정 · 지정 밖의 사업장은 보이지 않음 */
+function appBranches() {
+  const b = (window.APP_ACCESS && APP_ACCESS.branches) || [], R = {}, old = [];
+  b.forEach(x => { const m = /^([ev]):(.+)$/.exec(x || ''); if (m) R[m[2]] = m[1] === 'v' ? 'view' : 'edit'; else if (x) old.push(x); });
+  return { R, old, has: Object.keys(R).length > 0 };
+}
+function sitePerm(s) {
+  const A = appBranches(); if (!A.has) return 'edit'; if (!s) return null;
+  const ch = ouChain(siteOu(s)); for (let i = ch.length - 1; i >= 0; i--) { const p = A.R[ch[i].id]; if (p) return p; }
+  return null;
+}
+function siteRO(key) { const s = SITE[key]; return !!s && sitePerm(s) === 'view'; }
+function roBlock(key) { if (key && siteRO(key)) { toast('👁 이 사업장은 보기만 할 수 있습니다 — 저장하지 않았습니다 (통합관리 콘솔 › 프로그램별 권한)', 4500); return true; } return false; }
 /* 관리 대상(기록을 시작한) 사업장 — 기록이 하나라도 있거나 설정에서 「관리 시작」한 곳 */
 function activeSiteKeys() {
   if (CALC.has('active')) return CALC.get('active');
@@ -190,7 +206,7 @@ const tbmEveryDay = s => !/주5일|주간|통상/.test((SH.cfg[s.key] && SH.cfg[
 /* ---------- 근무자 명부 (사업장별) — 근태관리 연동 전에는 여기서 관리 ---------- */
 function workers(key, d) { return (SH.wk[key] || []).filter(w => !w.out || !d || w.out >= d).filter(w => !w.hired || !d || w.hired <= d); }
 function workerById(key, id) { return (SH.wk[key] || []).find(w => w.id === id); }
-function putWorkers(key, list) { SH.wk[key] = list; saveSH(); queueShare('wk_' + key); }
+function putWorkers(key, list) { if (roBlock(key)) return; SH.wk[key] = list; saveSH(); queueShare('wk_' + key); }
 
 /* ---------- 기간 ---------- */
 function periodRange(kind, ref) {
