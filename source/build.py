@@ -14,7 +14,7 @@ asset['hero'] = uri(V + 'hero.jpg', 'image/jpeg')           # 출력물(PPT · W
 asset['heroAnim'] = uri(V + 'hero-anim.gif', 'image/gif')  # 메인화면 히어로 — 안전보건 관리시스템 디오라마 애니메이션(업로드 GIF 원본 그대로)
 asset['thumbs'] = {f[:-4]: uri(ROOT + 'media/thumb/' + f, 'image/jpeg') for f in sorted(os.listdir(ROOT + 'media/thumb')) if f.endswith('.jpg')}
 html = rd(S + 'index.html')
-APPJS = '\n'.join(rd(S + f) for f in ['app.js', 'ui.js', 'views.js', 'views2.js', 'views3.js', 'demo.js', 'media.js', 'out_base.js', 'out.js', 'ledger.js', 'guide.js'])
+APPJS = '\n'.join(rd(S + f) for f in ['app.js', 'ui.js', 'views.js', 'views2.js', 'views3.js', 'demo.js', 'media.js', 'out_base.js', 'out.js', 'kb_ra.js', 'ledger.js', 'ledger_tpl.js', 'guide.js'])
 LIBS = rd(V + 'libs.html') + '\n<script>/* ExcelJS (MIT) */\n' + scr(rd(V + 'exceljs.min.js')) + '\n</script>'
 PDFJS = '<script>/* pdf.js (Apache-2.0) */\n' + scr(rd(V + 'pdf.min.js')) + '\n</script>\n<script type="text/plain" id="pdfwk">' + scr(rd(V + 'pdf.worker.min.js')) + '</script>'
 for ph, val in [('<!--LIBS-->', LIBS), ('<!--PDFJS-->', PDFJS), ('<!--QR-->', rd(V + 'qr.html')),

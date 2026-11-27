@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "date": "2026-11-26",
-  "note": "📒 안전보건 관리대장 탭 신설(7장 46항목 · 사업장별 적용 자동 판정 · 서류 자동 작성 · 원본 첨부 · 조직 일괄 작성) · 양식·서류 불러오기(Word·PPT·PDF·사진 → 사업장별 작성) · 회사·조직 선택을 접이식 트리로",
-  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.1.0.html",
-  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.1.0.apk"
+  "version": "1.2.0",
+  "date": "2026-11-27",
+  "note": "📒 관리대장을 회사 양식 그대로 작성(회사 양식팩) — 회사 배포 Word·Excel·PPT 양식에 사업장 정보·상세 내용을 채움, 이수증·수료증·교안 등 원본은 그대로 비치(회사·지사·개인·사업장 범위), 동부 사업장 기존 회사 서식 서류 사용 · 위험성평가 회사 3×3 기준 상세 작성 · 근골격계 직종별 상세 조사 · 조직 일괄 ZIP",
+  "html": "releases/S-Tec-Safety-and-Health-Management-System_v1.2.0.html",
+  "apk": "releases/S-Tec-Safety-and-Health-Management-System_v1.2.0.apk"
 }

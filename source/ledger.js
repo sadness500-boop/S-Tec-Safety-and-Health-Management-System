@@ -185,9 +185,12 @@ function ledCtx(s) {
   const chem = (info.chem && info.chem.length ? info.chem.map(c => Array.isArray(c) ? c : [c, '']) : [].concat(...jobs.map(j => LK.chem[j] || []), LK.chemInd[s.ind] || []));
   const mach = (info.mach && info.mach.length ? info.mach.map(m => Array.isArray(m) ? m : [m, '']) : [].concat(...jobs.map(j => LK.mach[j] || [])));
   return { s, info, co, W, names: W.map(w => w.name).filter(Boolean), y, jobs, jobsN: jobs.map(j => JOBS[j].n).join(' · '), jobsS: jobs.map(j => JOBS[j].s).join('·'), ind: INDS[s.ind] || { n: '-' }, total: +(info.total || s.total || W.length || 0),
-    label: siteOrgLabel(s), mgr: info.mgr || (UI.manager && UI.manager.name) || '', mgrPos: info.mgrPos || '현장 관리감독자', head: info.head || '', headPos: info.headPos || '지사장', tel: info.tel || '', addr: info.addr || s.addr || '',
+    label: siteOrgLabel(s), mgr: info.mgr || ledSiteHead(s)[1] || '', mgrPos: info.mgrPos || ledSiteHead(s)[0] || '현장 관리감독자', head: info.head || ledBrHead(s), headPos: info.headPos || '지사장', tel: info.tel || '', addr: info.addr || s.addr || '',
     form: ledForm(s), chem, mach, online: info.edu === 'online', d: today() };
 }
+/* 사업장 현장 책임자(사업장 현황의 「직책 성명」) · 지사장(로그인 담당자가 그 지사 소속일 때) */
+function ledSiteHead(s) { const h = String(s.head || '').trim().split(/\s+/).filter(Boolean); if (!h.length) return ['', '']; if (h.length === 1) return ['', h[0]]; const posRe = /^(선임|반장|소장|대장|팀장|조장|주임|실장|과장|대리|부장|파트장|총괄|반장님)$/; return posRe.test(h[0]) ? [h[0], h.slice(1).join(' ')] : posRe.test(h[h.length - 1]) ? [h[h.length - 1], h.slice(0, -1).join(' ')] : ['', h.join(' ')]; }
+function ledBrHead(s) { const m = UI.manager; if (!m || !m.name || !m.ou) return ''; try { return ouChain(siteOu(s)).some(o => o.id === m.ou) && /지사|본부/.test((OU_ID[m.ou] || {}).kind || (OU_ID[m.ou] || {}).name || '') ? m.name : ''; } catch (e) { return ''; } }
 const ldD = d => { const x = parseD(d); return x ? `${x.getFullYear()}년 ${x.getMonth() + 1}월 ${x.getDate()}일` : '    년    월    일'; };
 function ldHead(c, t, sub, noAp) {
   return [{ k: 'title', t, approval: noAp ? null : APPROVAL, sub: sub || '' },
@@ -722,15 +725,16 @@ function ledOrgCard() {
   const rows = L.slice(0, 80).map(s => { const st = ledStat(s); return `<tr><td>${esc(s.name)}</td><td class="mini">${esc(siteOrgLabel(s))}</td><td class="c">${esc(LED_FORM_N[ledForm(s)].split(' (')[0])}</td><td class="c">${s.jobs.map(j => JOBS[j] ? JOBS[j].s : j).join('·')}</td><td class="c"><div class="lbar"><i style="width:${st.pct}%"></i></div>${st.done}/${st.need}</td><td><button class="btn sm" data-lgo="${s.key}">열기</button></td></tr>`; }).join('');
   return `<div class="card" style="--c:#0B1F8A"><h2>🏢 조직 단위 관리대장 <span class="r">${esc(ou ? ouLabel(ou.id) || ou.name : '에스텍 그룹 전체')} · ${L.length}곳</span></h2><div class="body">
     <p class="hint">위 「회사 · 조직」에서 지사 · 본부를 고르면 그 아래 사업장 전체의 관리대장을 한 번에 만듭니다. 사업장마다 업종(보안 / 시설·미화) · 산업 · 직종 · 인원에 맞춰 항목 적용(○ / n/a)과 서류 내용이 달라집니다.</p>
-    <div class="row"><button class="btn pri" id="lBatch">📚 ${L.length}곳 관리대장 일괄 작성 (Word · ZIP)</button><button class="btn" id="lImpAll">📥 양식·서류 불러와 ${L.length}곳 작성</button></div>
+    <div class="row"><button class="btn pri" id="lBatch">📚 ${L.length}곳 관리대장 일괄 작성 (${lpHas() ? '회사 양식' : '간이 Word'} · ZIP)</button><button class="btn" id="lImpAll">📥 양식·서류 불러와 ${L.length}곳 작성</button></div>
     <div class="tblw" style="margin-top:10px"><table class="t"><thead><tr><th>사업장</th><th>소속</th><th>양식</th><th>업종</th><th>비치</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="6" class="empty">사업장이 없습니다</td></tr>'}</tbody></table></div>${L.length > 80 ? `<p class="hint">앞 80곳만 보입니다 (전체 ${L.length}곳 — 일괄 작성은 전체 대상).</p>` : ''}
   </div></div>`;
 }
 RENDER.led = function renderLed() {
   const host = $('#p-led'), s = curSite();
+  if (!LP.tried) { LP.tried = true; lpInit().then(m => { if (m && UI.tab === 'led') RENDER.led(); }); }
   if (!s) {
-    host.innerHTML = siteBarHtml() + `<div class="card" style="--c:#1B7A34"><h2>📒 안전보건 관리대장 <span class="r">7장 46항목 · 모든 서류 3년 이상 보존</span></h2><div class="body"><p>회사가 중점 관리하는 「안전보건관리대장」 서류철을 사업장별로 만들고 비치 여부를 관리합니다. 사업장을 고르면 그 사업장에 해당하는 항목과 서류가 자동으로 정해집니다.</p></div></div>` + ledOrgCard();
-    bindSiteBar(host, RENDER.led); ledBindOrg(host); return;
+    host.innerHTML = siteBarHtml() + `<div class="card" style="--c:#1B7A34"><h2>📒 안전보건 관리대장 <span class="r">7장 46항목 · 모든 서류 3년 이상 보존</span></h2><div class="body"><p>회사가 중점 관리하는 「안전보건관리대장」 서류철을 사업장별로 만들고 비치 여부를 관리합니다. 사업장을 고르면 그 사업장에 해당하는 항목과 서류가 자동으로 정해집니다.</p></div></div>` + lpCardHtml() + ledOrgCard();
+    bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host); return;
   }
   const c = ledCtx(s), st = ledStat(s), box = ledAll()[s.key] || { it: {} };
   const chs = [1, 2, 3, 4, 5, 6, 7].map(ch => {
@@ -743,23 +747,23 @@ RENDER.led = function renderLed() {
           ${(x.files || []).length ? `<div class="lfiles">${x.files.map(f => `<span class="lfile"><a href="#" data-lf="${esc(f.key)}">📎 ${esc(f.n)}</a><button type="button" data-lx="${esc(f.key)}" data-li="${it.id}" title="첨부 삭제">✕</button></span>`).join('')}</div>` : ''}</div>
         <button type="button" class="lv" style="--c:${V[2]}" data-lv="${it.id}" title="눌러서 적용 바꾸기 (자동 → ○ → n/a)">${V[0]}<small>${(box.info && box.info.ov && box.info.ov[it.id]) ? '직접' : '자동'}</small></button>
         <span class="lst">${a.v === 'n' ? '—' : x.ok ? `✔ 비치<small>${fmtDs(x.okD || x.gen || today())}</small>` : '<em>미비치</em>'}</span>
-        <div class="lact">${LG[it.id] ? `<button class="btn sm" data-lw="${it.id}">📄 Word</button><button class="btn sm" data-lp="${it.id}">PDF</button>` : ''}<button class="btn sm" data-la="${it.id}">📎 첨부</button><button class="btn sm ${x.ok ? 'pri' : ''}" data-lk="${it.id}">${x.ok ? '✔ 비치됨' : '비치 확인'}</button></div></div>`; }).join('')}</details>`;
+        <div class="lact">${lpHas() ? (() => { const n = lpCount(s, it.id); return `<button class="btn sm ${n.forms + n.site + n.orig ? 'pri' : ''}" data-lc="${it.id}" title="회사 양식 ${n.forms} · 사업장 서류 ${n.site} · 원본 ${n.orig}">📄 회사 양식${n.forms + n.site + n.orig ? ` <small>${[n.forms ? '양식 ' + n.forms : '', n.site ? '사업장 ' + n.site : '', n.orig ? '원본 ' + n.orig : ''].filter(Boolean).join('·')}</small>` : ' <small>없음→간이</small>'}</button>`; })() : (LG[it.id] ? `<button class="btn sm" data-lw="${it.id}">📄 간이 Word</button><button class="btn sm" data-lp="${it.id}">PDF</button>` : '')}<button class="btn sm" data-la="${it.id}">📎 첨부</button><button class="btn sm ${x.ok ? 'pri' : ''}" data-lk="${it.id}">${x.ok ? '✔ 비치됨' : '비치 확인'}</button></div></div>`; }).join('')}</details>`;
   }).join('');
   host.innerHTML = siteBarHtml() + `<div class="two"><div>
     <div class="card" style="--c:#0B1F8A"><h2>📒 ${c.y}년 안전보건 관리대장 — ${esc(s.name)} <span class="r">${esc(LED_FORM_N[c.form])}</span></h2><div class="body">
       <div class="lprof"><div><small>회사</small><b>${esc(c.co.n)}</b></div><div><small>업종(직종)</small><b>${esc(c.jobsN)}</b></div><div><small>산업</small><b>${c.ind.ic || ''} ${esc(c.ind.n)}</b></div><div><small>근로자</small><b>${c.total || '-'}명</b></div><div><small>관리감독자</small><b>${esc(c.mgr || '미등록')}</b></div></div>
       <div class="lsum"><div class="lbar big"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b><span>해당 ${st.need}항목 중 ${st.done}항목 비치 · 해당 없음 ${st.na}항목</span></div>
-      <div class="row" style="margin-top:10px"><button class="btn pri" id="lFullW">📚 대장 전체 Word</button><button class="btn" id="lFullP">📚 대장 전체 PDF</button><button class="btn" id="lImp">📥 양식·서류 불러오기</button><button class="btn" id="lInfo">⚙ 대장 기본정보</button>
+      <div class="row" style="margin-top:10px">${lpHas() ? `<button class="btn pri" id="lFullZ">📚 대장 전체 — 회사 양식 (ZIP)</button>` : `<button class="btn pri" id="lFullW">📚 대장 전체 간이 Word</button><button class="btn" id="lFullP">📚 간이 PDF</button>`}<button class="btn" id="lImp">📥 양식·서류 불러오기</button><button class="btn" id="lInfo">⚙ 대장 기본정보</button>
         <label class="chk" style="margin-left:auto"><input type="checkbox" id="lAtt" ${LV.attach ? 'checked' : ''}> 첨부 원본(사진 · PDF)도 대장에 넣기</label></div>
-      <p class="hint">「📄 Word · PDF」를 누르면 프로그램이 ${esc(c.jobsS)} 업종 · ${esc(c.ind.n)} 특성과 근무자 명부(${c.names.length}명) · 위험성평가 · 교육 · 보호구 · 점검 기록으로 서류를 작성합니다. 출력해 서명받고 비치한 뒤 「비치 확인」을 누르세요. 수료증 · 확인서처럼 밖에서 받는 서류는 「📎 첨부」로 원본을 넣습니다.</p>
+      ${lpHas() ? `<p class="hint">「📄 회사 양식」을 누르면 <b>회사가 배포한 양식 그대로</b> ${esc(c.jobsS)} 업종 · ${esc(c.ind.n)} 특성 · 근무자 명부(${c.names.length}명)로 채워 작성하고, 이수증 · 수료증 · 경영방침 같은 원본은 그대로 함께 내려받습니다. 사업장에 이미 회사 서식으로 만든 서류(조직도 · 지정서 · 근골격계 조사 · 예산 · 훈련)가 있으면 그 서류를 씁니다.</p>` : ''}<p class="hint" ${lpHas() ? 'hidden' : ''}>「📄 Word · PDF」를 누르면 프로그램이 ${esc(c.jobsS)} 업종 · ${esc(c.ind.n)} 특성과 근무자 명부(${c.names.length}명) · 위험성평가 · 교육 · 보호구 · 점검 기록으로 서류를 작성합니다. 출력해 서명받고 비치한 뒤 「비치 확인」을 누르세요. 수료증 · 확인서처럼 밖에서 받는 서류는 「📎 첨부」로 원본을 넣습니다.</p>
     </div></div>
     <div class="lchs">${chs}</div></div>
-    <div><div class="card" style="--c:#1B7A34"><h2>📥 양식 · 서류 불러오기</h2><div class="body">
+    <div>${lpCardHtml()}<div class="card" style="--c:#1B7A34"><h2>📥 양식 · 서류 불러오기</h2><div class="body">
       <p>회사 양식이나 기존 서류(Word · PPT · PDF · 사진)를 불러오면 어느 대장 항목인지 알아보고, <b>이 사업장 또는 조직 전체 사업장</b>마다 업종 · 산업 · 직종에 맞춰 서류를 작성합니다.</p>
       <ul class="hl"><li>Word · PPT 양식 → 서식 그대로 사업장명 · 소속 · 주소 · 업종 체크 · 날짜 · 근무자 성명을 채움</li><li>PDF · 사진 → 원본을 그대로 붙이고 같은 종류 서류를 프로그램이 작성</li><li>원본은 관리대장 해당 항목에 첨부(비치)</li></ul>
       <button class="btn pri" id="lImp2">📥 불러오기 시작</button></div></div>
       ${ledOrgCard()}</div></div>`;
-  bindSiteBar(host, RENDER.led); ledBindOrg(host);
+  bindSiteBar(host, RENDER.led); ledBindOrg(host); lpBindCard(host);
   host.querySelectorAll('details.lch').forEach(d => d.ontoggle = () => { LV.open[d.dataset.ch] = d.open; });
   host.querySelectorAll('[data-lw]').forEach(b => b.onclick = () => ledOutItem(s, b.dataset.lw, 'docx'));
   host.querySelectorAll('[data-lp]').forEach(b => b.onclick = () => ledOutItem(s, b.dataset.lp, 'pdf'));
@@ -769,13 +773,15 @@ RENDER.led = function renderLed() {
   host.querySelectorAll('[data-lf]').forEach(a => a.onclick = async e => { e.preventDefault(); const f = [].concat(...Object.values(box.it || {}).map(x => x.files || [])).find(x => x.key === a.dataset.lf), b = await ldbGet(a.dataset.lf).catch(() => null); if (!b) return toast('이 기기에 원본이 없습니다(다른 기기에서 첨부함)'); download(b, f ? f.n : 'file'); });
   host.querySelectorAll('[data-lx]').forEach(b => b.onclick = async () => { if (!confirmBox('이 첨부를 지울까요?')) return; const x = ledIt(s.key, b.dataset.li); x.files = (x.files || []).filter(f => f.key !== b.dataset.lx); if (!/^shared\|/.test(b.dataset.lx)) await ldbDel(b.dataset.lx); saveSH(); RENDER.led(); });
   $('#lAtt').onchange = e => { LV.attach = e.target.checked; };
-  $('#lFullW').onclick = () => ledOutFull(s, 'docx', LV.attach);
-  $('#lFullP').onclick = () => ledOutFull(s, 'pdf', LV.attach);
+  if ($('#lFullW')) $('#lFullW').onclick = () => ledOutFull(s, 'docx', LV.attach);
+  if ($('#lFullP')) $('#lFullP').onclick = () => ledOutFull(s, 'pdf', LV.attach);
+  if ($('#lFullZ')) $('#lFullZ').onclick = () => lpOutFull(s);
+  host.querySelectorAll('[data-lc]').forEach(b => b.onclick = () => lpOutItem(s, b.dataset.lc));
   $('#lInfo').onclick = () => ledInfoModal(s);
   $('#lImp').onclick = $('#lImp2').onclick = () => ledImportModal(s);
 };
 function ledBindOrg(host) {
-  const b = host.querySelector('#lBatch'); if (b) b.onclick = () => ledBatch(ledSitesInScope(), 'docx');
+  const b = host.querySelector('#lBatch'); if (b) b.onclick = () => lpHas() ? lpBatch(ledSitesInScope()) : ledBatch(ledSitesInScope(), 'docx');
   const i = host.querySelector('#lImpAll'); if (i) i.onclick = () => ledImportModal(curSite(), true);
   host.querySelectorAll('[data-lgo]').forEach(x => x.onclick = () => { UI.site = x.dataset.lgo; saveUI(); RENDER.led(); window.scrollTo({ top: $('.tabs').offsetTop, behavior: 'smooth' }); });
 }
@@ -891,4 +897,20 @@ async function ledImportRun(files, sites, opt) {
     toast(`${sites.length}곳 · 서류 ${out.length}개를 작성했습니다`, 3500);
   } catch (e) { console.error(e); toast('작성하지 못했습니다: ' + (e.message || e), 5000); }
   finally { busy(false); if (UI.tab === 'led') RENDER.led(); }
+}
+
+/* 회사 양식팩 카드 */
+function lpCardHtml() {
+  const m = LP.man, own = typeof isOwnerUser === 'function' && isOwnerUser();
+  const n = m ? new Set(m.files.map(x => x.k)).size : 0, f = m ? m.files.filter(x => x.kind === 'f').length : 0, o = m ? m.files.filter(x => x.kind === 'o').length : 0, st = m ? m.files.filter(x => x.kind === 's').length : 0;
+  return `<div class="card" style="--c:${m ? '#1B7A34' : '#B45309'}"><h2>📦 회사 양식팩 <span class="r">${m ? `${esc(m.ver || '')} · ${LP.from === 'server' ? '서버' : '이 기기'}` : '없음'}</span></h2><div class="body">
+    ${m ? `<p>회사 양식 <b>${f}</b> · 원본(이수증 · 수료증 · 교안 등) <b>${o}</b> · 사업장 기존 서류 <b>${st}</b> — 파일 ${n}개</p><p class="hint">관리대장 서류는 이 양식팩의 <b>회사 양식 그대로</b> 만들어집니다.</p>`
+      : `<p><b>회사 양식팩을 먼저 불러오세요.</b> 지금은 프로그램 간이 서식으로 만들어집니다.</p><p class="hint">양식팩(zip)은 회사 안전보건관리대장 압축자료(표지 · 1~7장)에서 만든 파일입니다. 개인정보(이수증 · 명부)가 들어 있어 공개 저장소에 넣지 않고, 이 기기 또는 로그인한 사람만 보는 서버 보관함에 둡니다.</p>`}
+    <div class="row"><label class="btn ${m ? '' : 'pri'}">📦 양식팩 불러오기 (zip)<input type="file" id="lpZip" accept=".zip" hidden></label>
+      ${lpClient() ? `<button class="btn" id="lpSync">🔄 서버에서 받기</button>` : ''}${own && m ? `<button class="btn" id="lpUp">☁ 서버에 올려 공유</button>` : ''}</div></div></div>`;
+}
+function lpBindCard(host) {
+  const z = host.querySelector('#lpZip'); if (z) z.onchange = async () => { if (z.files[0]) { await lpImport(z.files[0]); RENDER.led(); } };
+  const y = host.querySelector('#lpSync'); if (y) y.onclick = async () => { busy(true, '서버 양식팩 확인 중…'); try { await lpInit(true); toast(LP.man ? `서버 양식팩 ${LP.man.ver}` : '서버에 양식팩이 없습니다'); } finally { busy(false); RENDER.led(); } };
+  const u = host.querySelector('#lpUp'); if (u) u.onclick = async () => { if (confirmBox('양식팩 전체를 서버 보관함에 올립니다(로그인한 사람만 볼 수 있음). 계속할까요?')) await lpUpload(); };
 }
