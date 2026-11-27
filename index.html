@@ -7778,9 +7778,14 @@ function perTargets(s, y, mode) {
   return out.sort((a, b) => ix(a[0].id) - ix(b[0].id) || (a[1].from < b[1].from ? -1 : 1));
 }
 async function perZipSite(s, y, mode, zip, dir) {
-  const T = perTargets(s, y, mode);
+  const T = perTargets(s, y, mode), seen = {};
   for (const [e, P] of T) { const it = LED_ID[e.id];
-    for (const f of await perBuild(s, e, P)) zip.file(`${dir}${lpChDir(it.ch)}/${lpItDir(it)}/${f.name}`, f.blob);
+    for (const f of await perBuild(s, e, P)) {
+      /* 같은 연간 파일(예: 12개월 탭이 든 예방교육 일지 엑셀)이 기간마다 되풀이되면 한 번만 넣음 */
+      const base = f.name.slice(P.label.length + 1), k = `${e.p}|${base}|${f.blob.size}`;
+      if (f.blob.size > 300000 && seen[k]) continue;
+      let name = f.name; if (f.blob.size > 300000) { if (seen[k] === undefined && T.filter(t => t[0] === e).length > 1) name = lpNm(`${y}년 (연간 · 전 기간 공통) ${base}`); seen[k] = 1; }
+      zip.file(`${dir}${lpChDir(it.ch)}/${lpItDir(it)}/${name}`, f.blob); }
     perMark(s, e, P); await new Promise(r => setTimeout(r, 0)); }
   return T.length;
 }
