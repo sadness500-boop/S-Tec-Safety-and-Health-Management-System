@@ -3837,8 +3837,8 @@ const APP = {
   ko: '에스텍 안전보건 관리 시스템',
   sub: '중대재해처벌법 대응',
   code: 'stsh',
-  version: 'v1.3.1',
-  build: '2026-11-27',
+  version: 'v1.3.2',
+  build: '2026-11-28',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Safety-and-Health-Management-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System/releases/download/app-latest/stsh-latest.apk',
   repo: 'https://github.com/sadness500-boop/S-Tec-Safety-and-Health-Management-System',
@@ -4001,15 +4001,20 @@ function siteOk(s, F) {
   if (sitePerm(s) === null) return false;
   return true;
 }
-/* v1.3.1 프로그램별 관리범위 — 통합관리 콘솔 「🔐 프로그램별 권한」에서 조직별로 ✏️수정('e:조직id') / 👁보기('v:조직id') 지정
-   가장 가까운 상위 조직의 지정이 적용 · 지정이 하나도 없으면 전체 수정 · 지정 밖의 사업장은 보이지 않음 */
+/* v1.3.2 프로그램별 관리범위 — 서버(app_check)가 계산해 준 범위: 통합관리 콘솔 「🔐 프로그램별 권한」에서 이 프로그램만 정한 범위,
+   없으면 그 사람의 공통 관리범위(근태관리 칸). perm_map {조직id:'edit'|'view'} 에 없는 조직의 사업장은 보이지 않음 */
 function appBranches() {
-  const b = (window.APP_ACCESS && APP_ACCESS.branches) || [], R = {}, old = [];
+  const A = window.APP_ACCESS || {}, sc = A.scope;
+  if (sc) return { old: [], all: !!sc.all, perm: sc.all ? (sc.perm || 'edit') : null, map: A.perm_map || null };
+  const b = A.branches || [], R = {}, old = [];   // 옛 서버(범위 계산 전)
   b.forEach(x => { const m = /^([ev]):(.+)$/.exec(x || ''); if (m) R[m[2]] = m[1] === 'v' ? 'view' : 'edit'; else if (x) old.push(x); });
-  return { R, old, has: Object.keys(R).length > 0 };
+  return { old, all: false, R, map: null, has: Object.keys(R).length > 0 };
 }
 function sitePerm(s) {
-  const A = appBranches(); if (!A.has) return 'edit'; if (!s) return null;
+  const A = appBranches(); if (!s) return null;
+  if (A.all) return A.perm;
+  if (A.map) return A.map[siteOu(s)] || null;
+  if (!A.has) return 'edit';
   const ch = ouChain(siteOu(s)); for (let i = ch.length - 1; i >= 0; i--) { const p = A.R[ch[i].id]; if (p) return p; }
   return null;
 }
